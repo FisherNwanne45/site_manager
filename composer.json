@@ -1,0 +1,20 @@
+{
+  "name": "yourproject/site-manager",
+  "description": "Website Management System",
+  "type": "project",
+  "require": {
+    "phpmailer/phpmailer": "^6.6",
+    "phpoffice/phpspreadsheet": "^4.1"
+  },
+  "config": {
+    "vendor-dir": "vendor"
+  },
+  "autoload": {
+    "psr-4": {
+      "": [
+        "controllers/",
+        "models/"
+      ]
+    }
+  }
+}
