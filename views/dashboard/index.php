@@ -162,7 +162,7 @@
                                                 <tr>
                                                     <td><?= htmlspecialchars($website['name']) ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -179,7 +179,7 @@
                                                 <tr class="d-none more-expiring-rows">
                                                     <td><?= htmlspecialchars($website['name']) ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -233,7 +233,7 @@
                                                 <tr>
                                                     <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -250,7 +250,7 @@
                                                 <tr class="d-none more-buggy-rows">
                                                     <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -307,7 +307,7 @@
                                                 <tr>
                                                     <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -324,7 +324,7 @@
                                                 <tr class="d-none more-expired-rows">
                                                     <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
                                                     <td>
-                                                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>">
+                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
                                                             <?= htmlspecialchars($website['domain']) ?>
                                                         </a>
                                                     </td>
@@ -376,7 +376,7 @@
                                             <?php foreach (array_slice($hostingWithCounts, 0, 2) as $hosting): ?>
                                                 <tr>
                                                     <td>
-                                                        <a href="index.php?action=hosting&do=edit&id=<?= $hosting['id'] ?>">
+                                                        <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
                                                             <?= htmlspecialchars($hosting['server_name']) ?>
                                                         </a>
                                                     </td>

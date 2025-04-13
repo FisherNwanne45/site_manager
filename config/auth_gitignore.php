@@ -1,8 +1,8 @@
 <?php
-// Authentication settings
+// Authentication settings original auth.php
 define('AUTH_SALT', 'your_random_salt_here');
 // config/auth.php
-define('ENCRYPTION_KEY', 'x@/czqui,;cos[]#2@enzafav-+>4618');
+define('ENCRYPTION_KEY', 'your-very-secret-key-32-characters-long');
 define('SESSION_TIMEOUT', 1800); // 30 minutes
 
 // Session settings

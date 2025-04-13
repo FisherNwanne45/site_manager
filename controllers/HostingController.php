@@ -83,6 +83,24 @@ class HostingController
         require APP_PATH . '/views/hosting/create.php';
     }
 
+    public function view($id)
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=login');
+            exit;
+        }
+
+        $hostingPlan = $this->hostingModel->getHostingPlanById($id);
+        if (!$hostingPlan) {
+            header('Location: index.php?action=hosting');
+            exit;
+        }
+
+
+
+        require APP_PATH . '/views/hosting/view.php';
+    }
+
     public function edit($id)
     {
         if (!isset($_SESSION['user_id'])) {

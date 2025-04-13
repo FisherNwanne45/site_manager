@@ -37,7 +37,12 @@ class Hosting
 
     public function getHostingPlanById($id)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM hosting_plans WHERE id = ?");
+        $stmt = $this->pdo->prepare("
+        SELECT h.*, 
+               (SELECT COUNT(*) FROM websites WHERE hosting_id = h.id) as service_count
+        FROM hosting_plans h
+        WHERE h.id = ?
+    ");
         $stmt->execute([$id]);
         return $stmt->fetch();
     }

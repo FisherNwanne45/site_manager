@@ -176,6 +176,10 @@
                                             <?php endif; ?>
                                         </td>
                                         <td>
+                                            <a href="index.php?action=hosting&do=view&id=<?= $plan['id'] ?>"
+                                                class="btn btn-sm btn-success" data-custom-tooltip="Visualizzare">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <a href="index.php?action=hosting&do=edit&id=<?= $plan['id'] ?>"
                                                 class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
                                                 <i class="fas fa-edit"></i>

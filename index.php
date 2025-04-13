@@ -33,6 +33,10 @@ switch ($action) {
                 $id = $_GET['id'] ?? 0;
                 $websiteController->edit($id);
                 break;
+            case 'view':
+                $id = $_GET['id'] ?? 0;
+                $websiteController->view($id);
+                break;
             case 'delete':
                 $id = $_GET['id'] ?? 0;
                 $websiteController->delete($id);
@@ -43,7 +47,7 @@ switch ($action) {
             case 'export':
                 $websiteController->export();
                 break;
-            case 'renew':  // ADD THIS NEW CASE
+            case 'renew':
                 $id = $_GET['id'] ?? 0;
                 $websiteController->renew($id);
                 break;
@@ -55,6 +59,10 @@ switch ($action) {
         switch ($do) {
             case 'create':
                 $hostingController->create();
+                break;
+            case 'view':
+                $id = $_GET['id'] ?? 0;
+                $hostingController->view($id);
                 break;
             case 'edit':
                 $id = $_GET['id'] ?? 0;

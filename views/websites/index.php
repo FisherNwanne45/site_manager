@@ -293,6 +293,10 @@
                                             </span>
                                         </td>
                                         <td>
+                                            <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>"
+                                                class="btn btn-sm btn-success" data-custom-tooltip="Visualizzare">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
                                             <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
                                                 class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
                                                 <i class="fas fa-edit"></i>

@@ -133,6 +133,25 @@ class WebsiteController
         require APP_PATH . '/views/websites/form.php';
     }
 
+    public function view($id)
+    {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['LAST_ACTIVITY'])) {
+            header('Location: index.php?action=login');
+            exit;
+        }
+
+        $website = $this->websiteModel->getWebsiteById($id);
+        if (!$website) {
+            header('Location: index.php?action=websites');
+            exit;
+        }
+
+        // Calculate dynamic status for the view
+        $website['dynamic_status'] = $this->websiteModel->calculateDynamicStatus($website['expiry_date']);
+
+        require APP_PATH . '/views/websites/view.php';
+    }
+
     public function edit($id)
     {
         if (!isset($_SESSION['user_id']) || !isset($_SESSION['LAST_ACTIVITY'])) {
