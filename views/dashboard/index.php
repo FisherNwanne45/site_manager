@@ -397,7 +397,7 @@
                                             <?php foreach (array_slice($hostingWithCounts, 2) as $hosting): ?>
                                                 <tr class="d-none more-hosting-rows">
                                                     <td>
-                                                        <a href="index.php?action=hosting&do=edit&id=<?= $hosting['id'] ?>">
+                                                        <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
                                                             <?= htmlspecialchars($hosting['server_name']) ?>
                                                         </a>
                                                     </td>

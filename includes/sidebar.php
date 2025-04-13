@@ -1,49 +1,82 @@
+<?php
+// Determine active states
+$currentAction = $_GET['action'] ?? 'dashboard';
+$currentDo = $_GET['do'] ?? '';
+$isSettingsActive = ($currentAction === 'settings');
+?>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="index.php?action=dashboard" class="brand-link">
-        <!-- Display logo when expanded -->
         <img src="assets/images/logo.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <!-- Display text when collapsed -->
-        <span class="brand-text "><?= APP_NAME ?></span>
+        <span class="brand-text font-weight-light"><?= APP_NAME ?></span>
     </a>
 
+    <!-- Sidebar -->
     <div class="sidebar">
         <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                <!-- Dashboard -->
                 <li class="nav-item">
                     <a href="index.php?action=dashboard"
-                        class="nav-link <?= $activePage == 'dashboard' ? 'active' : '' ?>">
-                        <i class="nav-icon fas fa-home"></i>
+                        class="nav-link <?= ($currentAction === 'dashboard') ? 'active' : '' ?>">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
+
+                <!-- Services -->
                 <li class="nav-item">
                     <a href="index.php?action=websites"
-                        class="nav-link <?= $activePage == 'websites' ? 'active' : '' ?>">
+                        class="nav-link <?= ($currentAction === 'websites') ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-server"></i>
                         <p>Servizi</p>
                     </a>
                 </li>
+
+                <!-- Clients -->
                 <li class="nav-item">
-                    <a href="index.php?action=hosting" class="nav-link <?= $activePage == 'hosting' ? 'active' : '' ?>">
+                    <a href="index.php?action=hosting"
+                        class="nav-link <?= ($currentAction === 'hosting') ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Clienti</p>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="index.php?action=settings&do=smtp"
-                        class="nav-link <?= $activePage == 'settings' ? 'active' : '' ?>">
+
+                <!-- Settings (with submenu) -->
+                <li class="nav-item has-treeview <?= $isSettingsActive ? 'menu-open' : '' ?>">
+                    <a href="#" class="nav-link <?= $isSettingsActive ? 'active' : '' ?>">
                         <i class="nav-icon fas fa-cog"></i>
-                        <p>Impostazioni</p>
+                        <p>
+                            Impostazioni
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview" style="<?= $isSettingsActive ? 'display: block;' : '' ?>">
+                        <li class="nav-item">
+                            <a href="index.php?action=settings&do=smtp"
+                                class="nav-link <?= ($isSettingsActive && $currentDo === 'smtp') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-envelope"></i>
+                                <p>Email SMTP</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="index.php?action=settings&do=advanced"
+                                class="nav-link <?= ($isSettingsActive && $currentDo === 'advanced') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-sliders-h"></i>
+                                <p>Avanzate</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="index.php?action=settings&do=password"
+                                class="nav-link <?= ($isSettingsActive && $currentDo === 'password') ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-key"></i>
+                                <p>Password</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="index.php?action=settings&do=password"
-                        class="nav-link <?= $activePage == 'password' ? 'active' : '' ?>">
-                        <i class="nav-icon fas fa-key"></i>
-                        <p>Cambiare la password</p>
-                    </a>
-                </li>
+
+                <!-- Logout -->
                 <li class="nav-item">
                     <a href="index.php?action=logout" class="nav-link">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
@@ -54,3 +87,27 @@
         </nav>
     </div>
 </aside>
+
+<style>
+    /* Enhanced hover effects */
+    .nav-sidebar .nav-item>.nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Active item styling */
+    .nav-sidebar .nav-item>.nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-left: 3px solid #3c8dbc;
+    }
+
+    /* Submenu active item */
+    .nav-treeview .nav-item>.nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15);
+        font-weight: 600;
+    }
+
+    /* Keep submenu open when active */
+    .nav-item.has-treeview.menu-open>.nav-treeview {
+        display: block;
+    }
+</style>

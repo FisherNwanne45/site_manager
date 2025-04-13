@@ -25,7 +25,7 @@ class Hosting
             FROM 
                 hosting_plans h
             LEFT JOIN 
-                websites w ON h.email_address = w.assigned_email
+                websites w ON h.id = w.hosting_id
             GROUP BY 
                 h.id, h.server_name, h.provider, h.email_address
             ORDER BY 

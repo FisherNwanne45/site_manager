@@ -1,5 +1,11 @@
 <?php
 require __DIR__ . '/../config/bootstrap.php';
+// Check if cron is enabled
+$cronModel = new CronModel($pdo);
+if (!$cronModel->getCronStatus()) {
+    error_log("Cron job is disabled in settings");
+    exit(0);
+}
 
 // Config
 $dryRun = false;
@@ -122,3 +128,4 @@ $summary = sprintf(
     count($websites)
 );
 error_log($summary);
+$cronModel->updateLastRunTime();

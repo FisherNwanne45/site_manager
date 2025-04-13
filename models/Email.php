@@ -8,102 +8,47 @@ class Email
         $this->pdo = $pdo;
     }
 
-    private function encryptPassword($plaintext)
-    {
-        $key = $this->getEncryptionKey();
-        $iv = random_bytes(16); // Generate random initialization vector
-        $ciphertext = openssl_encrypt(
-            $plaintext,
-            'AES-256-CBC',
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
-        return base64_encode($iv . $ciphertext);
-    }
-
-    /**
-     * Decrypts SMTP password
-     */
-    private function decryptPassword($encrypted)
-    {
-        $key = $this->getEncryptionKey();
-        $data = base64_decode($encrypted);
-        $iv = substr($data, 0, 16); // Extract IV from first 16 bytes
-        $ciphertext = substr($data, 16);
-        return openssl_decrypt(
-            $ciphertext,
-            'AES-256-CBC',
-            $key,
-            OPENSSL_RAW_DATA,
-            $iv
-        );
-    }
-
-    /**
-     * Gets encryption key from configuration
-     */
-    private function getEncryptionKey()
-    {
-        // Define this in your config/auth.php
-        if (!defined('ENCRYPTION_KEY')) {
-            throw new RuntimeException('Encryption key not configured');
-        }
-
-        // Ensure key is exactly 32 bytes for AES-256
-        return substr(hash('sha256', ENCRYPTION_KEY), 0, 32);
-    }
 
     public function getSmtpSettings()
     {
         $stmt = $this->pdo->query("SELECT * FROM smtp_settings ORDER BY id DESC LIMIT 1");
         $settings = $stmt->fetch();
 
-        if ($settings && !empty($settings['password'])) {
-            try {
-                $settings['password'] = $this->decryptPassword($settings['password']);
-            } catch (Exception $e) {
-                error_log("Failed to decrypt SMTP password: " . $e->getMessage());
-                $settings['password'] = ''; // Fallback to empty password
-            }
-        }
+        // if ($settings && !empty($settings['password'])) {
+        //  try {
+        //      $settings['password'] = $this->decryptPassword($settings['password']);
+        //  } catch (Exception $e) {
+        //     error_log("Failed to decrypt SMTP password: " . $e->getMessage());
+        //     $settings['password'] = ''; // Fallback to empty password
+        //  }
+        //  }
 
         return $settings;
     }
 
     public function updateSmtpSettings($data)
     {
-        // Encrypt the password before storing
-        if (!empty($data['password'])) {
-            $data['password'] = $this->encryptPassword($data['password']);
-        } else {
-            // If password field was left empty, keep the existing one
-            $current = $this->getSmtpSettings();
-            if ($current) {
-                $data['password'] = $current['password'];
-            }
-        }
-
+        // Remove all encryption-related code
         $stmt = $this->pdo->prepare("
-        INSERT INTO smtp_settings 
-        (host, port, username, password, encryption, from_email, from_name, cc_email) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON DUPLICATE KEY UPDATE 
-        host = VALUES(host), 
-        port = VALUES(port), 
-        username = VALUES(username), 
-        password = VALUES(password), 
-        encryption = VALUES(encryption), 
-        from_email = VALUES(from_email), 
-        from_name = VALUES(from_name),
-        cc_email = VALUES(cc_email)
-    ");
+            INSERT INTO smtp_settings 
+            (host, port, username, password, encryption, from_email, from_name, cc_email) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+            host = VALUES(host), 
+            port = VALUES(port), 
+            username = VALUES(username), 
+            password = VALUES(password), 
+            encryption = VALUES(encryption), 
+            from_email = VALUES(from_email), 
+            from_name = VALUES(from_name),
+            cc_email = VALUES(cc_email)
+        ");
 
         return $stmt->execute([
             $data['host'],
-            $data['port'],
+            (int)$data['port'],
             $data['username'],
-            $data['password'],
+            $data['password'], // Store plain text
             $data['encryption'],
             $data['from_email'],
             $data['from_name'],
@@ -330,13 +275,8 @@ HTML;
         $mail->Host = $smtpSettings['host'];
         $mail->SMTPAuth = true;
         $mail->Username = $smtpSettings['username'];
-        // Use decrypted password
-        try {
-            $mail->Password = $this->decryptPassword($smtpSettings['password']);
-        } catch (Exception $e) {
-            error_log("Failed to decrypt SMTP password: " . $e->getMessage());
-            throw new Exception("Failed to configure mailer: invalid password");
-        }
+        $mail->Password = $smtpSettings['password'];
+
         $mail->Port = $smtpSettings['port'];
         $mail->CharSet = 'UTF-8';
 

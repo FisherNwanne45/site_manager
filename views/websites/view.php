@@ -9,7 +9,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Dettagli Servizio</h1>
+                    <h5>Dettagli Servizio: <b><?= htmlspecialchars($website['domain']) ?></b> </h5>
                 </div>
                 <div class="col-sm-6 text-right">
                     <a onclick="window.history.back();" class="btn btn-secondary">
@@ -24,13 +24,13 @@
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header">
+                <!--<div class="card-header">
                     <h3 class="card-title"><?= htmlspecialchars($website['domain']) ?></h3>
-                </div>
+                </div>-->
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h4>Informazioni Generali</h4>
+                            <h6>Informazioni Generali</h6>
                             <table class="table table-bordered">
                                 <tr>
                                     <th style="width: 30%">Cliente</th>
@@ -61,7 +61,7 @@
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <h4>Dettagli Aggiuntivi</h4>
+                            <h6>Dettagli Aggiuntivi</h6>
                             <table class="table table-bordered">
                                 <tr>
                                     <th style="width: 30%">Email Assegnata</th>
@@ -88,23 +88,20 @@
                     </div>
 
                     <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h4>Bug Report</h4>
+                        <div class="col-md-6">
+                            <h6>Bug Report</h6>
                             <div class="card">
                                 <div class="card-body">
-                                    <p><?= !empty($website['notes']) ? nl2br(htmlspecialchars($website['notes'])) : 'Nessuna nota' ?>
+                                    <p><?= !empty($website['notes']) ? nl2br(htmlspecialchars($website['notes'])) : 'Nessuna bug' ?>
                                     </p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h4>Note</h4>
+                        <div class="col-md-6">
+                            <h6>Note</h6>
                             <div class="card">
                                 <div class="card-body">
-                                    <p><?= !empty($website['remark']) ? nl2br(htmlspecialchars($website['remark'])) : 'Nessun remark' ?>
+                                    <p><?= !empty($website['remark']) ? nl2br(htmlspecialchars($website['remark'])) : 'Nessun note' ?>
                                     </p>
                                 </div>
                             </div>

@@ -2,10 +2,12 @@
 class SettingsController
 {
     private $emailModel;
+    private $cronModel;
 
     public function __construct($pdo)
     {
         $this->emailModel = new Email($pdo);
+        $this->cronModel = new CronModel($pdo);
     }
 
     public function smtp()
@@ -147,5 +149,29 @@ class SettingsController
             ]);
         }
         exit;
+    }
+
+    public function advanced()
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=login');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $isActive = isset($_POST['cron_active']) && $_POST['cron_active'] === '1';
+            $success = $this->cronModel->updateCronStatus($isActive);
+
+            if ($success) {
+                $_SESSION['message'] = "Impostazioni cron aggiornate correttamente";
+            } else {
+                $_SESSION['error'] = "Errore durante l'aggiornamento delle impostazioni cron";
+            }
+        }
+
+        $cronStatus = $this->cronModel->getCronStatus();
+        $lastRun = $this->cronModel->getLastRunTime();
+
+        require APP_PATH . '/views/settings/advanced.php';
     }
 }

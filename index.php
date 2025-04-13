@@ -104,6 +104,9 @@ switch ($action) {
             case 'test_smtp':
                 $settingsController->testSmtp();
                 break;
+            case 'advanced':
+                $settingsController->advanced();
+                break;
             case 'password':
                 $authController->changePassword();
                 break;
