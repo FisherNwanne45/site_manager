@@ -108,11 +108,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-footer text-right">
-                    <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifica
-                    </a>
-                </div>
+                <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                    <div class="card-footer text-right">
+                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Modifica
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>

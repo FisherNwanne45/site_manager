@@ -59,12 +59,12 @@
                                         <?php
                                         $serviceCount = $hostingPlan['service_count'] ?? 0;
                                         if ($serviceCount > 0): ?>
-                                        <a href="index.php?action=hosting&do=services&id=<?= $hostingPlan['id'] ?>"
-                                            class="btn btn-sm btn-info">
-                                            Vedi <?= $serviceCount ?>
-                                        </a>
+                                            <a href="index.php?action=hosting&do=services&id=<?= $hostingPlan['id'] ?>"
+                                                class="btn btn-sm btn-info">
+                                                Vedi <?= $serviceCount ?>
+                                            </a>
                                         <?php else: ?>
-                                        <span class="text-muted">Nessun servizio</span>
+                                            <span class="text-muted">Nessun servizio</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -81,23 +81,25 @@
                     </div>
 
                     <?php if (!empty($hostingPlan['notes'])): ?>
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <h4>Note</h4>
-                            <div class="card">
-                                <div class="card-body">
-                                    <p><?= nl2br(htmlspecialchars($hostingPlan['notes'])) ?></p>
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <h4>Note</h4>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <p><?= nl2br(htmlspecialchars($hostingPlan['notes'])) ?></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <?php endif; ?>
                 </div>
-                <div class="card-footer text-right">
-                    <a href="index.php?action=hosting&do=edit&id=<?= $hostingPlan['id'] ?>" class="btn btn-primary">
-                        <i class="fas fa-edit"></i> Modifica
-                    </a>
-                </div>
+                <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                    <div class="card-footer text-right">
+                        <a href="index.php?action=hosting&do=edit&id=<?= $hostingPlan['id'] ?>" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Modifica
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>

@@ -34,31 +34,31 @@ $website = array_merge($defaultWebsite, $website);
                 <div class="col-sm-6">
                     <h6 class="card-title mb-0">
                         <?php if ($website['id']) : ?>
-                        <b><?= htmlspecialchars($website['domain']) ?> </b>
-                        <?php
+                            <b><?= htmlspecialchars($website['domain']) ?> </b>
+                            <?php
                             $badgeClass = [
                                 'attivo' => 'success',
                                 'scade_presto' => 'warning',
                                 'scaduto' => 'danger'
                             ][$website['dynamic_status']];
                             ?>
-                        <span class="badge badge-<?= $badgeClass ?>">
-                            <?= ucwords(str_replace('_', ' ', $website['dynamic_status'])) ?>
-                        </span>
+                            <span class="badge badge-<?= $badgeClass ?>">
+                                <?= ucwords(str_replace('_', ' ', $website['dynamic_status'])) ?>
+                            </span>
                         <?php else : ?>
-                        Dettagli del nuovo servizio
+                            Dettagli del nuovo servizio
                         <?php endif; ?>
                     </h6>
 
                 </div>
                 <div class="col-sm-6 text-right">
                     <?php if ($website['id'] && $website['dynamic_status'] === 'scade_presto'): ?>
-                    <form method="POST" action="index.php?action=websites&do=renew&id=<?= $website['id'] ?>"
-                        class="d-inline">
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-sync-alt"></i> Segna come rinnovato (+1 anno)
-                        </button>
-                    </form>
+                        <form method="POST" action="index.php?action=websites&do=renew&id=<?= $website['id'] ?>"
+                            class="d-inline">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-sync-alt"></i> Segna come rinnovato (+1 anno)
+                            </button>
+                        </form>
                     <?php endif; ?>
                 </div>
             </div>
@@ -70,7 +70,7 @@ $website = array_merge($defaultWebsite, $website);
         <div class="container-fluid">
 
             <?php if (isset($error)): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
             <div class="card">
@@ -84,12 +84,12 @@ $website = array_merge($defaultWebsite, $website);
                                 <select class="form-control" id="hosting_id" name="hosting_id">
                                     <option value="">-- Nessun cliente selezionato --</option>
                                     <?php foreach ($hostingPlans as $plan): ?>
-                                    <option value="<?= $plan['id'] ?>"
-                                        <?= (isset($website['hosting_id']) && $website['hosting_id'] == $plan['id']) ? 'selected' : '' ?>
-                                        data-email="<?= htmlspecialchars($plan['email_address'] ?? '') ?>">
-                                        <?= htmlspecialchars($plan['server_name']) ?>
-                                        (<?= htmlspecialchars($plan['provider'] ?? 'N/A') ?>)
-                                    </option>
+                                        <option value="<?= $plan['id'] ?>"
+                                            <?= (isset($website['hosting_id']) && $website['hosting_id'] == $plan['id']) ? 'selected' : '' ?>
+                                            data-email="<?= htmlspecialchars($plan['email_address'] ?? '') ?>">
+                                            <?= htmlspecialchars($plan['server_name']) ?>
+                                            (<?= htmlspecialchars($plan['provider'] ?? 'N/A') ?>)
+                                        </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
@@ -198,41 +198,49 @@ $website = array_merge($defaultWebsite, $website);
     </section>
 </div>
 <script>
-document.getElementById('hosting_id').addEventListener('change', function() {
-    const hostingId = this.value;
-    const emailField = document.getElementById('assigned_email');
+    document.getElementById('hosting_id').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const emailField = document.getElementById('assigned_email');
 
-    if (hostingId) {
-        fetch(`index.php?action=getHostingEmail&id=${hostingId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('La risposta della rete non è stata buona');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    console.error(data.error);
-                    emailField.value = '';
-                } else {
-                    emailField.value = data.email;
-                }
-            })
-            .catch(error => {
-                console.error('Errore durante il recupero del client:', error);
-                emailField.value = '';
-            });
-    } else {
-        emailField.value = '';
-    }
-});
+        // Get email from data-attribute first (faster, no API call needed)
+        if (selectedOption && selectedOption.dataset.email) {
+            emailField.value = selectedOption.dataset.email;
+        } else {
+            emailField.value = '';
+        }
 
-// Trigger change event on page load if hosting is preselected
-document.addEventListener('DOMContentLoaded', function() {
-    const hostingSelect = document.getElementById('hosting_id');
-    if (hostingSelect.value) {
-        hostingSelect.dispatchEvent(new Event('change'));
-    }
-});
+        // Optional: Still make the API call to verify
+        const hostingId = this.value;
+        if (hostingId) {
+            fetch(`index.php?action=websites&do=getHostingEmail&id=${hostingId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.email && data.email !== emailField.value) {
+                        emailField.value = data.email;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const hostingSelect = document.getElementById('hosting_id');
+        if (hostingSelect.value) {
+            hostingSelect.dispatchEvent(new Event('change'));
+        }
+
+        // Fallback: Check if email exists but field is empty
+        const emailField = document.getElementById('assigned_email');
+        if (!emailField.value && hostingSelect.value) {
+            const selectedOption = hostingSelect.options[hostingSelect.selectedIndex];
+            if (selectedOption && selectedOption.dataset.email) {
+                emailField.value = selectedOption.dataset.email;
+            }
+        }
+    });
 </script>
 <?php include APP_PATH . '/includes/footer.php'; ?>

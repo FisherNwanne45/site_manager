@@ -39,33 +39,34 @@
             </div>
 
             <!-- Toolbar -->
+
             <div class="mb-3 d-flex flex-wrap justify-content-between align-items-center">
-                <div>
-                    <a href="index.php?action=websites&do=create" class="btn btn-primary btn-sm mr-2">
-                        <i class="fas fa-plus"></i> Aggiungi servizio
-                    </a>
+                <div><?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                        <a href="index.php?action=websites&do=create" class="btn btn-primary btn-sm mr-2">
+                            <i class="fas fa-plus"></i> Aggiungi servizio
+                        </a><?php endif; ?>
                     <form method="post" action="index.php?action=websites&do=export" class="d-inline">
                         <button type="submit" class="btn btn-success btn-sm">
                             <i class="fas fa-file-export"></i> Esporta file Excel
                         </button>
                     </form>
-                </div>
-                <form method="post" action="index.php?action=websites&do=import" enctype="multipart/form-data"
-                    class="d-flex"
-                    onsubmit="return confirm('Questo aggiornerà i siti web esistenti con i domini corrispondenti. Continuare?')">
-                    <div class="input-group input-group-sm">
-                        <div class="custom-file">
-                            <input type="file" class="custom-file-input" id="import_file" name="import_file" required
-                                accept=".xls,.xlsx" onchange="updateFileName(this)">
-                            <label class="custom-file-label" for="import_file">Scegli il file Excel</label>
+                </div><?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                    <form method="post" action="index.php?action=websites&do=import" enctype="multipart/form-data"
+                        class="d-flex"
+                        onsubmit="return confirm('Questo aggiornerà i siti web esistenti con i domini corrispondenti. Continuare?')">
+                        <div class="input-group input-group-sm">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="import_file" name="import_file" required
+                                    accept=".xls,.xlsx" onchange="updateFileName(this)">
+                                <label class="custom-file-label" for="import_file">Scegli il file Excel</label>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-info" type="submit">
+                                    <i class="fas fa-file-import"></i> Importare
+                                </button>
+                            </div>
                         </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-info" type="submit">
-                                <i class="fas fa-file-import"></i> Importare
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    </form><?php endif; ?>
                 <script>
                     function updateFileName(input) {
                         if (input.files && input.files[0]) {
@@ -297,31 +298,32 @@
                                                 class="btn btn-sm btn-success" data-custom-tooltip="Visualizzare">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
-                                                class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
-                                                class="btn btn-sm btn-info confirmable" data-type="email"
-                                                data-name="<?= htmlspecialchars($website['domain']) ?>"
-                                                data-custom-tooltip="Invia email di scadenza">
-                                                <i class="fas fa-envelope"></i>
-                                            </a>
-                                            <a href="index.php?action=email&do=status&id=<?= $website['id'] ?>"
-                                                class="btn btn-sm btn-secondary confirmable" data-type="email"
-                                                data-name="<?= htmlspecialchars($website['domain']) ?>"
-                                                data-custom-tooltip="E-mail rapporto stato">
-                                                <i class="fas fa-bell"></i>
-                                            </a>
-                                            <form method="post"
-                                                action="index.php?action=websites&do=delete&id=<?= $website['id'] ?>"
-                                                class="d-inline confirmable" data-type="delete"
-                                                data-name="<?= htmlspecialchars($website['domain']) ?>">
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    data-custom-tooltip="Eliminare">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                                                <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
+                                                    class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
+                                                    class="btn btn-sm btn-info confirmable" data-type="email"
+                                                    data-name="<?= htmlspecialchars($website['domain']) ?>"
+                                                    data-custom-tooltip="Invia email di scadenza">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
+                                                <a href="index.php?action=email&do=status&id=<?= $website['id'] ?>"
+                                                    class="btn btn-sm btn-secondary confirmable" data-type="email"
+                                                    data-name="<?= htmlspecialchars($website['domain']) ?>"
+                                                    data-custom-tooltip="E-mail rapporto stato">
+                                                    <i class="fas fa-bell"></i>
+                                                </a>
+                                                <form method="post"
+                                                    action="index.php?action=websites&do=delete&id=<?= $website['id'] ?>"
+                                                    class="d-inline confirmable" data-type="delete"
+                                                    data-name="<?= htmlspecialchars($website['domain']) ?>">
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                        data-custom-tooltip="Eliminare">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form><?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

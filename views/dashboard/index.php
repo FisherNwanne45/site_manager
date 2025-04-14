@@ -14,7 +14,15 @@
             </div>
         </div>
     </section>
+    <?php if (isset($_SESSION['message'])): ?>
+    <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
+    <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
 
+    <?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+    <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
@@ -88,49 +96,49 @@
             </div>
 
             <style>
-                .view-more-link {
-                    color: #6c757d;
-                    text-decoration: none;
-                    font-style: italic;
-                    transition: all 0.3s ease;
-                }
+            .view-more-link {
+                color: #6c757d;
+                text-decoration: none;
+                font-style: italic;
+                transition: all 0.3s ease;
+            }
 
-                .view-more-link:hover {
-                    color: #007bff;
-                    text-decoration: underline;
-                }
+            .view-more-link:hover {
+                color: #007bff;
+                text-decoration: underline;
+            }
 
-                .view-more-link i {
-                    margin-right: 5px;
-                }
+            .view-more-link i {
+                margin-right: 5px;
+            }
 
-                .table-sm-text {
-                    font-size: 0.85rem;
-                }
+            .table-sm-text {
+                font-size: 0.85rem;
+            }
 
-                .table-sm-text th,
-                .table-sm-text td {
-                    padding: 0.5rem 0.8rem;
-                }
+            .table-sm-text th,
+            .table-sm-text td {
+                padding: 0.5rem 0.8rem;
+            }
 
-                .badge-scaduto {
-                    background-color: #dc3545;
-                    color: white;
-                }
+            .badge-scaduto {
+                background-color: #dc3545;
+                color: white;
+            }
 
-                .badge-in-scadenza {
-                    background-color: #ffc107;
-                    color: #212529;
-                }
+            .badge-in-scadenza {
+                background-color: #ffc107;
+                color: #212529;
+            }
 
-                .badge-info {
-                    min-width: 25px;
-                    display: inline-block;
-                }
+            .badge-info {
+                min-width: 25px;
+                display: inline-block;
+            }
 
-                .text-center {
-                    text-align: center;
-                }
+            .text-center {
+                text-align: center;
+            }
             </style>
 
             <!-- First Row of Tables -->
@@ -146,61 +154,61 @@
                         </div>
                         <div class="card-body">
                             <?php if (empty($expiringWebsites)): ?>
-                                <p>Nessun servizio in scadenza nei prossimi 30 giorni.</p>
+                            <p>Nessun servizio in scadenza nei prossimi 30 giorni.</p>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm-text">
-                                        <thead>
-                                            <tr>
-                                                <th>Nome</th>
-                                                <th>Servizi</th>
-                                                <th>In scadenza</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="expiringTableBody">
-                                            <?php foreach (array_slice($expiringWebsites, 0, 2) as $website): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($website['name']) ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-in-scadenza">
-                                                            <?= htmlspecialchars($website['expiry_date']) ?>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm-text">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>Servizi</th>
+                                            <th>In scadenza</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="expiringTableBody">
+                                        <?php foreach (array_slice($expiringWebsites, 0, 2) as $website): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($website['name']) ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-in-scadenza">
+                                                    <?= htmlspecialchars($website['expiry_date']) ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
 
-                                            <!-- Hidden rows -->
-                                            <?php foreach (array_slice($expiringWebsites, 2) as $website): ?>
-                                                <tr class="d-none more-expiring-rows">
-                                                    <td><?= htmlspecialchars($website['name']) ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
+                                        <!-- Hidden rows -->
+                                        <?php foreach (array_slice($expiringWebsites, 2) as $website): ?>
+                                        <tr class="d-none more-expiring-rows">
+                                            <td><?= htmlspecialchars($website['name']) ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
 
-                                                    <td>
-                                                        <span class="badge badge-in-scadenza">
-                                                            <?= htmlspecialchars($website['expiry_date']) ?>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php if (count($expiringWebsites) > 2): ?>
-                                    <div class="text-center mt-2">
-                                        <a href="#" class="view-more-link" data-target="expiring">
-                                            <i class="fas fa-chevron-down"></i> Visualizza tutto
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
+                                            <td>
+                                                <span class="badge badge-in-scadenza">
+                                                    <?= htmlspecialchars($website['expiry_date']) ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <?php if (count($expiringWebsites) > 2): ?>
+                            <div class="text-center mt-2">
+                                <a href="#" class="view-more-link" data-target="expiring">
+                                    <i class="fas fa-chevron-down"></i> Visualizza tutto
+                                </a>
+                            </div>
+                            <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -217,60 +225,60 @@
                         </div>
                         <div class="card-body">
                             <?php if (empty($buggyWebsites)): ?>
-                                <p>Nessun servizio con problemi.</p>
+                            <p>Nessun servizio con problemi.</p>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm-text">
-                                        <thead>
-                                            <tr>
-                                                <th>Cliente</th>
-                                                <th>Servizio</th>
-                                                <th>Bugs?</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="buggyTableBody">
-                                            <?php foreach (array_slice($buggyWebsites, 0, 2) as $website): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-warning">
-                                                            Si
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm-text">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Servizio</th>
+                                            <th>Bugs?</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="buggyTableBody">
+                                        <?php foreach (array_slice($buggyWebsites, 0, 2) as $website): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-warning">
+                                                    Si
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
 
-                                            <!-- Hidden rows -->
-                                            <?php foreach (array_slice($buggyWebsites, 2) as $website): ?>
-                                                <tr class="d-none more-buggy-rows">
-                                                    <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-warning">
-                                                            Si
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php if (count($buggyWebsites) > 2): ?>
-                                    <div class="text-center mt-2">
-                                        <a href="#" class="view-more-link" data-target="buggy">
-                                            <i class="fas fa-chevron-down"></i> Visualizza tutto
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
+                                        <!-- Hidden rows -->
+                                        <?php foreach (array_slice($buggyWebsites, 2) as $website): ?>
+                                        <tr class="d-none more-buggy-rows">
+                                            <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-warning">
+                                                    Si
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <?php if (count($buggyWebsites) > 2): ?>
+                            <div class="text-center mt-2">
+                                <a href="#" class="view-more-link" data-target="buggy">
+                                    <i class="fas fa-chevron-down"></i> Visualizza tutto
+                                </a>
+                            </div>
+                            <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -291,60 +299,60 @@
                         </div>
                         <div class="card-body">
                             <?php if (empty($expiredWebsites)): ?>
-                                <p>Nessun servizio scaduto.</p>
+                            <p>Nessun servizio scaduto.</p>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm-text">
-                                        <thead>
-                                            <tr>
-                                                <th>Cliente</th>
-                                                <th>Servizio</th>
-                                                <th>Scaduto</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="expiredTableBody">
-                                            <?php foreach (array_slice($expiredWebsites, 0, 2) as $website): ?>
-                                                <tr>
-                                                    <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-scaduto">
-                                                            <?= htmlspecialchars($website['expiry_date']) ?>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm-text">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Servizio</th>
+                                            <th>Scaduto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="expiredTableBody">
+                                        <?php foreach (array_slice($expiredWebsites, 0, 2) as $website): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-scaduto">
+                                                    <?= htmlspecialchars($website['expiry_date']) ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
 
-                                            <!-- Hidden rows -->
-                                            <?php foreach (array_slice($expiredWebsites, 2) as $website): ?>
-                                                <tr class="d-none more-expired-rows">
-                                                    <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
-                                                    <td>
-                                                        <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
-                                                            <?= htmlspecialchars($website['domain']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge badge-scaduto">
-                                                            <?= htmlspecialchars($website['expiry_date']) ?>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php if (count($expiredWebsites) > 2): ?>
-                                    <div class="text-center mt-2">
-                                        <a href="#" class="view-more-link" data-target="expired">
-                                            <i class="fas fa-chevron-down"></i> Visualizza tutto
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
+                                        <!-- Hidden rows -->
+                                        <?php foreach (array_slice($expiredWebsites, 2) as $website): ?>
+                                        <tr class="d-none more-expired-rows">
+                                            <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
+                                            <td>
+                                                <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>">
+                                                    <?= htmlspecialchars($website['domain']) ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-scaduto">
+                                                    <?= htmlspecialchars($website['expiry_date']) ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <?php if (count($expiredWebsites) > 2): ?>
+                            <div class="text-center mt-2">
+                                <a href="#" class="view-more-link" data-target="expired">
+                                    <i class="fas fa-chevron-down"></i> Visualizza tutto
+                                </a>
+                            </div>
+                            <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -361,69 +369,69 @@
                         </div>
                         <div class="card-body">
                             <?php if (empty($hostingWithCounts)): ?>
-                                <p>Nessun cliente trovato.</p>
+                            <p>Nessun cliente trovato.</p>
                             <?php else: ?>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped table-sm-text">
-                                        <thead>
-                                            <tr>
-                                                <th>Cliente</th>
-                                                <th>P. Iva</th>
-                                                <th>Servizi Associati</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="hostingSummaryTableBody">
-                                            <?php foreach (array_slice($hostingWithCounts, 0, 2) as $hosting): ?>
-                                                <tr>
-                                                    <td>
-                                                        <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
-                                                            <?= htmlspecialchars($hosting['server_name']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td><?= htmlspecialchars($hosting['provider'] ?? 'N/A') ?></td>
-                                                    <td class="text-center">
-                                                        <a href="index.php?action=hosting&do=services&id=<?= $hosting['id'] ?>">
-                                                            <span class="badge badge-info">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-sm-text">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>P. Iva</th>
+                                            <th>Servizi Associati</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="hostingSummaryTableBody">
+                                        <?php foreach (array_slice($hostingWithCounts, 0, 2) as $hosting): ?>
+                                        <tr>
+                                            <td>
+                                                <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
+                                                    <?= htmlspecialchars($hosting['server_name']) ?>
+                                                </a>
+                                            </td>
+                                            <td><?= htmlspecialchars($hosting['provider'] ?? 'N/A') ?></td>
+                                            <td class="text-center">
+                                                <a href="index.php?action=hosting&do=services&id=<?= $hosting['id'] ?>">
+                                                    <span class="badge badge-info">
 
-                                                                <?= $hosting['service_count'] ?>
+                                                        <?= $hosting['service_count'] ?>
 
-                                                            </span>
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
+                                                    </span>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
 
-                                            <!-- Hidden rows -->
-                                            <?php foreach (array_slice($hostingWithCounts, 2) as $hosting): ?>
-                                                <tr class="d-none more-hosting-rows">
-                                                    <td>
-                                                        <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
-                                                            <?= htmlspecialchars($hosting['server_name']) ?>
-                                                        </a>
-                                                    </td>
-                                                    <td><?= htmlspecialchars($hosting['provider'] ?? 'N/A') ?></td>
-                                                    <td class="text-center">
-                                                        <a href="index.php?action=hosting&do=services&id=<?= $hosting['id'] ?>">
-                                                            <span class="badge badge-info">
+                                        <!-- Hidden rows -->
+                                        <?php foreach (array_slice($hostingWithCounts, 2) as $hosting): ?>
+                                        <tr class="d-none more-hosting-rows">
+                                            <td>
+                                                <a href="index.php?action=hosting&do=view&id=<?= $hosting['id'] ?>">
+                                                    <?= htmlspecialchars($hosting['server_name']) ?>
+                                                </a>
+                                            </td>
+                                            <td><?= htmlspecialchars($hosting['provider'] ?? 'N/A') ?></td>
+                                            <td class="text-center">
+                                                <a href="index.php?action=hosting&do=services&id=<?= $hosting['id'] ?>">
+                                                    <span class="badge badge-info">
 
-                                                                <?= $hosting['service_count'] ?>
+                                                        <?= $hosting['service_count'] ?>
 
-                                                            </span>
-                                                        </a>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php if (count($hostingWithCounts) > 2): ?>
-                                    <div class="text-center mt-2">
-                                        <a href="#" class="view-more-link" data-target="hosting">
-                                            <i class="fas fa-chevron-down"></i> Visualizza tutto
-                                        </a>
-                                    </div>
-                                <?php endif; ?>
+                                                    </span>
+                                                </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <?php if (count($hostingWithCounts) > 2): ?>
+                            <div class="text-center mt-2">
+                                <a href="#" class="view-more-link" data-target="hosting">
+                                    <i class="fas fa-chevron-down"></i> Visualizza tutto
+                                </a>
+                            </div>
+                            <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -435,31 +443,31 @@
 </div>
 <!-- /.content-wrapper -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const viewMoreLinks = document.querySelectorAll('.view-more-link');
+document.addEventListener('DOMContentLoaded', function() {
+    const viewMoreLinks = document.querySelectorAll('.view-more-link');
 
-        viewMoreLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = this.getAttribute('data-target');
-                const icon = this.querySelector('i');
-                const rows = document.querySelectorAll(`.more-${target}-rows`);
+    viewMoreLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.getAttribute('data-target');
+            const icon = this.querySelector('i');
+            const rows = document.querySelectorAll(`.more-${target}-rows`);
 
-                if (this.classList.contains('expanded')) {
-                    // Collapse the table
-                    rows.forEach(row => row.classList.add('d-none'));
-                    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
-                    this.innerHTML = '<i class="fas fa-chevron-down"></i> Visualizza tutto';
-                    this.classList.remove('expanded');
-                } else {
-                    // Expand the table
-                    rows.forEach(row => row.classList.remove('d-none'));
-                    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
-                    this.innerHTML = '<i class="fas fa-chevron-up"></i> Mostra meno';
-                    this.classList.add('expanded');
-                }
-            });
+            if (this.classList.contains('expanded')) {
+                // Collapse the table
+                rows.forEach(row => row.classList.add('d-none'));
+                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                this.innerHTML = '<i class="fas fa-chevron-down"></i> Visualizza tutto';
+                this.classList.remove('expanded');
+            } else {
+                // Expand the table
+                rows.forEach(row => row.classList.remove('d-none'));
+                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                this.innerHTML = '<i class="fas fa-chevron-up"></i> Mostra meno';
+                this.classList.add('expanded');
+            }
         });
     });
+});
 </script>
 <?php include APP_PATH . '/includes/footer.php'; ?>

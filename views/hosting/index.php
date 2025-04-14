@@ -11,9 +11,11 @@
                     <h1>Gestire i clienti</h1>
                 </div>
                 <div class="col-sm-6 text-sm-right">
-                    <a href="index.php?action=hosting&do=create" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus"></i> Aggiungi cliente
-                    </a>
+                    <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                        <a href="index.php?action=hosting&do=create" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Aggiungi cliente
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -180,19 +182,21 @@
                                                 class="btn btn-sm btn-success" data-custom-tooltip="Visualizzare">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="index.php?action=hosting&do=edit&id=<?= $plan['id'] ?>"
-                                                class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form method="post"
-                                                action="index.php?action=hosting&do=delete&id=<?= $plan['id'] ?>"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Sei sicuro di voler eliminare questo Cliente?');">
-                                                <button type="submit" class="btn btn-sm btn-danger"
-                                                    data-custom-tooltip="Eliminare">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                                                <a href="index.php?action=hosting&do=edit&id=<?= $plan['id'] ?>"
+                                                    class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="post"
+                                                    action="index.php?action=hosting&do=delete&id=<?= $plan['id'] ?>"
+                                                    class="d-inline"
+                                                    onsubmit="return confirm('Sei sicuro di voler eliminare questo Cliente?');">
+                                                    <button type="submit" class="btn btn-sm btn-danger"
+                                                        data-custom-tooltip="Eliminare">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

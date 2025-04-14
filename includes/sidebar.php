@@ -3,6 +3,7 @@
 $currentAction = $_GET['action'] ?? 'dashboard';
 $currentDo = $_GET['do'] ?? '';
 $isSettingsActive = ($currentAction === 'settings');
+$userRole = $_SESSION['user_role'] ?? 'viewer'; // Make sure you set this during login
 ?>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
@@ -15,7 +16,7 @@ $isSettingsActive = ($currentAction === 'settings');
     <div class="sidebar">
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                <!-- Dashboard -->
+                <!-- Dashboard - All Roles -->
                 <li class="nav-item">
                     <a href="index.php?action=dashboard"
                         class="nav-link <?= ($currentAction === 'dashboard') ? 'active' : '' ?>">
@@ -24,57 +25,73 @@ $isSettingsActive = ($currentAction === 'settings');
                     </a>
                 </li>
 
-                <!-- Services -->
+                <!-- Websites - All Roles -->
                 <li class="nav-item">
                     <a href="index.php?action=websites"
                         class="nav-link <?= ($currentAction === 'websites') ? 'active' : '' ?>">
-                        <i class="nav-icon fas fa-server"></i>
+                        <i class="nav-icon fas fa-globe"></i>
                         <p>Servizi</p>
                     </a>
                 </li>
 
-                <!-- Clients -->
+                <!-- Hosting - All Roles -->
                 <li class="nav-item">
                     <a href="index.php?action=hosting"
                         class="nav-link <?= ($currentAction === 'hosting') ? 'active' : '' ?>">
-                        <i class="nav-icon fas fa-users"></i>
+                        <i class="nav-icon fas fa-server"></i>
                         <p>Clienti</p>
                     </a>
                 </li>
 
-                <!-- Settings (with submenu) -->
-                <li class="nav-item has-treeview <?= $isSettingsActive ? 'menu-open' : '' ?>">
-                    <a href="#" class="nav-link <?= $isSettingsActive ? 'active' : '' ?>">
-                        <i class="nav-icon fas fa-cog"></i>
-                        <p>
-                            Impostazioni
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview" style="<?= $isSettingsActive ? 'display: block;' : '' ?>">
-                        <li class="nav-item">
-                            <a href="index.php?action=settings&do=smtp"
-                                class="nav-link <?= ($isSettingsActive && $currentDo === 'smtp') ? 'active' : '' ?>">
-                                <i class="nav-icon fas fa-envelope"></i>
-                                <p>Email SMTP</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="index.php?action=settings&do=advanced"
-                                class="nav-link <?= ($isSettingsActive && $currentDo === 'advanced') ? 'active' : '' ?>">
-                                <i class="nav-icon fas fa-sliders-h"></i>
-                                <p>Avanzate</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="index.php?action=settings&do=password"
-                                class="nav-link <?= ($isSettingsActive && $currentDo === 'password') ? 'active' : '' ?>">
-                                <i class="nav-icon fas fa-key"></i>
-                                <p>Password</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                <!-- Settings (Super Admin Only) -->
+                <?php if ($userRole === 'super_admin'): ?>
+                    <li
+                        class="nav-item has-treeview <?= ($isSettingsActive || $currentAction === 'users') ? 'menu-open' : '' ?>">
+                        <a href="#"
+                            class="nav-link <?= ($isSettingsActive || $currentAction === 'users') ? 'active' : '' ?>">
+                            <i class="nav-icon fas fa-cog"></i>
+                            <p>
+                                Impostazioni
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview"
+                            style="<?= ($isSettingsActive || $currentAction === 'users') ? 'display: block;' : '' ?>">
+                            <li class="nav-item">
+                                <a href="index.php?action=settings&do=smtp"
+                                    class="nav-link <?= ($isSettingsActive && $currentDo === 'smtp') ? 'active' : '' ?>">
+                                    <i class="nav-icon fas fa-envelope"></i>
+                                    <p>SMTP</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="index.php?action=settings&do=advanced"
+                                    class="nav-link <?= ($isSettingsActive && $currentDo === 'advanced') ? 'active' : '' ?>">
+                                    <i class="nav-icon fas fa-sliders-h"></i>
+                                    <p>Avanzate</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="index.php?action=users"
+                                    class="nav-link <?= ($currentAction === 'users') ? 'active' : '' ?>">
+                                    <i class="nav-icon fas fa-users-cog"></i>
+                                    <p>Gestione Utenti</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                <?php endif; ?>
+
+                <!-- Password Change - All Logged In Users (now outside settings) -->
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li class="nav-item">
+                        <a href="index.php?action=settings&do=password"
+                            class="nav-link <?= ($isSettingsActive && $currentDo === 'password') ? 'active' : '' ?>">
+                            <i class="nav-icon fas fa-key"></i>
+                            <p>Cambia Password</p>
+                        </a>
+                    </li>
+                <?php endif; ?>
 
                 <!-- Logout -->
                 <li class="nav-item">
@@ -87,6 +104,7 @@ $isSettingsActive = ($currentAction === 'settings');
         </nav>
     </div>
 </aside>
+
 
 <style>
     /* Enhanced hover effects */
