@@ -142,6 +142,39 @@
                 </div>
             </div>
             <style>
+                /* Ensure the table header and body columns align */
+                .table-responsive {
+                    overflow-x: auto;
+                }
+
+                /* Make sure the action buttons stay together */
+                .btn-group-actions {
+                    display: inline-flex;
+                    flex-wrap: nowrap;
+                }
+
+                /* Optional: Add horizontal scroll for small screens */
+                @media (max-width: 768px) {
+                    .table-responsive {
+                        -webkit-overflow-scrolling: touch;
+                    }
+                }
+
+                .no-wrap {
+                    white-space: nowrap;
+                    width: 17%;
+                }
+
+                .site-wrap {
+                    white-space: nowrap;
+                    width: 20%;
+                }
+
+                .date-wrap {
+                    white-space: nowrap;
+                    width: 10%;
+                }
+
                 .table-sm-text {
                     font-size: 0.90rem;
                 }
@@ -150,6 +183,16 @@
                 .table-sm-text td {
                     padding: 0.5rem 0.8rem;
                 }
+
+                .table td,
+                .table th {
+                    white-space: normal !important;
+                    /* word-break: break-word;*/
+                    max-width: 200px;
+
+                    vertical-align: top;
+                }
+
 
                 /* Custom Tooltip Styles */
                 [data-custom-tooltip] {
@@ -215,7 +258,7 @@
                                     </th>
 
                                     <!-- Domain Column -->
-                                    <th>
+                                    <th class="site-wrap">
                                         <a
                                             href="?action=websites&sort=domain&order=<?= ($sort == 'domain' && $order == 'asc') ? 'desc' : 'asc' ?>&search=<?= urlencode($search) ?>&per_page=<?= $perPage ?>">
                                             Dettaglio Servizi
@@ -248,7 +291,7 @@
                                     </th>
 
                                     <!-- Expiry Date Column -->
-                                    <th>
+                                    <th class="date-wrap">
                                         <a
                                             href="?action=websites&sort=expiry_date&order=<?= ($sort == 'expiry_date' && $order == 'asc') ? 'desc' : 'asc' ?>&search=<?= urlencode($search) ?>&per_page=<?= $perPage ?>">
                                             Scadenza
@@ -260,14 +303,14 @@
 
                                     <th>Bug?</th>
                                     <th>Stato</th>
-                                    <th>Azioni</th>
+                                    <th class="no-wrap">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($websites as $website): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
-                                        <td><?= htmlspecialchars($website['domain']) ?></td>
+                                        <td class="no-wrap"><?= htmlspecialchars($website['domain']) ?></td>
                                         <td><?= htmlspecialchars($website['name'] ?? 'N/A') ?></td>
                                         <td><?= htmlspecialchars($website['email_server']) ?></td>
                                         <td><?= htmlspecialchars($website['expiry_date']) ?></td>
@@ -293,16 +336,16 @@
                                                 <?= ucwords(str_replace('_', ' ', $status)) ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="no-wrap">
                                             <a href="index.php?action=websites&do=view&id=<?= $website['id'] ?>"
                                                 class="btn btn-sm btn-success" data-custom-tooltip="Visualizzare">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
-                                                <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
+                                                <!--<a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
                                                     class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
+                                                </a>-->
                                                 <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
                                                     class="btn btn-sm btn-info confirmable" data-type="email"
                                                     data-name="<?= htmlspecialchars($website['domain']) ?>"

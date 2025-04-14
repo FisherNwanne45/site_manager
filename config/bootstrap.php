@@ -2,6 +2,41 @@
 // Define base path FIRST
 define('BASE_PATH', realpath(dirname(__DIR__)));
 define('APP_PATH', BASE_PATH);
+// Define default language
+define('DEFAULT_LANG', 'it');
+
+// Initialize language
+$lang = $_SESSION['lang'] ?? DEFAULT_LANG;
+$translations = [];
+
+// Load language file
+$langFile = APP_PATH . "/lang/{$lang}.php";
+if (file_exists($langFile)) {
+    $translations = require $langFile;
+}
+
+// Helper function
+function __(string $key, array $params = []): string
+{
+    global $translations;
+
+    $keys = explode('.', $key);
+    $value = $translations;
+
+    foreach ($keys as $k) {
+        if (!isset($value[$k])) {
+            return $key; // Return key if translation not found
+        }
+        $value = $value[$k];
+    }
+
+    // Simple parameter replacement
+    foreach ($params as $k => $v) {
+        $value = str_replace("{{$k}}", $v, $value);
+    }
+
+    return $value;
+}
 
 // Load configuration files
 require APP_PATH . '/config/auth.php';
