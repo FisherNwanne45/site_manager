@@ -2,6 +2,7 @@
 class Website
 {
     private $pdo;
+    const DEFAULT_SHEET_NAME = 'Sheet1';
 
     public function __construct($pdo)
     {
@@ -846,5 +847,272 @@ class Website
     ");
         $stmt->execute([$hostingId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Google Sheets Integration Methods
+     */
+    public function prepareForGoogleSheets(): array
+    {
+        // Get all websites with their hosting information
+        $stmt = $this->pdo->query("
+        SELECT w.*, h.server_name, h.ip_address, h.email_address, h.provider, h.id as hosting_id
+        FROM websites w
+        LEFT JOIN hosting_plans h ON w.hosting_id = h.id
+        ORDER BY COALESCE(h.server_name, 'zzzzzzzz'), w.domain
+    ");
+
+        $websites = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Prepare the data array
+        $data = [];
+        $currentHostingId = null;
+        $clientRows = []; // Track row indices for each client
+
+        foreach ($websites as $index => $website) {
+            $isNewClient = ($currentHostingId !== $website['hosting_id']);
+            $currentHostingId = $website['hosting_id'];
+
+            if ($isNewClient) {
+                // Start a new client group
+                $clientRows[$currentHostingId] = [];
+            }
+
+            $rowData = [
+                // Client info (only show for first service)
+                $isNewClient ? ($website['server_name'] ?? '') : '',
+                $isNewClient ? ($website['ip_address'] ?? '') : '',
+                $isNewClient ? ($website['email_address'] ?? '') : '',
+                $isNewClient ? ($website['provider'] ?? '') : '',
+                // Service info (always show)
+                $website['name'] ?? '',
+                $website['domain'] ?? '',
+                $website['assigned_email'] ?? '',
+                $website['proprietario'] ?? '',
+                $website['email_server'] ?? '',
+                $this->formatDate($website['expiry_date'] ?? ''),
+                $website['status'] ?? '',
+                $website['dns'] ?? '',
+                $website['cpanel'] ?? '',
+                $website['epanel'] ?? '',
+                $website['notes'] ?? '',
+                $website['remark'] ?? ''
+            ];
+
+            $data[] = $rowData;
+            $clientRows[$currentHostingId][] = count($data) - 1; // Store row index (0-based)
+        }
+
+        return [
+            'data' => $data,
+            'clientRows' => $clientRows // Return the client row groupings
+        ];
+    }
+
+    /**
+     * Map single website to Google Sheets row format
+     */
+    private function mapToSheetFormat(array $website): array
+    {
+        $hosting = $this->getHostingInfo($website['hosting_id'] ?? null);
+
+        return [
+            // Client info (columns A-D)
+            $hosting['server_name'] ?? '',
+            $hosting['ip_address'] ?? '',
+            $hosting['email_address'] ?? '',
+            $hosting['provider'] ?? '',
+
+            // Service info (columns E-P)
+            $website['name'] ?? '',
+            $website['domain'] ?? '',
+            $website['assigned_email'] ?? '',
+            $website['proprietario'] ?? '',
+            $website['email_server'] ?? '',
+            $this->formatDate($website['expiry_date'] ?? ''),
+            $website['status'] ?? '',
+            $website['dns'] ?? '',
+            $website['cpanel'] ?? '',
+            $website['epanel'] ?? '',
+            $website['notes'] ?? '',
+            $website['remark'] ?? ''
+        ];
+    }
+
+    /**
+     * Import data from Google Sheets format
+     */
+    public function importFromSheets(array $sheetRows): array
+    {
+        $results = [
+            'imported' => 0,
+            'updated' => 0,
+            'skipped' => 0,
+            'errors' => [],
+            'hosting_created' => 0
+        ];
+
+        $currentHostingId = null;
+
+        foreach ($sheetRows as $index => $row) {
+            $rowNumber = $index + 1;
+
+            // Skip header rows (first 2 rows)
+            if ($rowNumber <= 1) {
+                continue;
+            }
+
+            // Skip empty rows
+            if (empty(array_filter($row))) {
+                $results['skipped']++;
+                continue;
+            }
+
+            // Ensure we have all columns
+            $row = array_pad($row, 16, '');
+
+            try {
+                // Extract client data (columns A-D)
+                $clientName = trim($row[0]);
+                $clientAddress = trim($row[1]);
+                $clientEmail = trim($row[2]);
+                $clientPiva = trim($row[3]);
+
+                // If client name exists, create/update hosting
+                if (!empty($clientName)) {
+                    $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE server_name = ?");
+                    $stmt->execute([$clientName]);
+                    $currentHostingId = $stmt->fetchColumn();
+
+                    if (!$currentHostingId) {
+                        $stmt = $this->pdo->prepare("
+                        INSERT INTO hosting_plans 
+                        (server_name, ip_address, email_address, provider) 
+                        VALUES (?, ?, ?, ?)
+                    ");
+                        $stmt->execute([$clientName, $clientAddress, $clientEmail, $clientPiva]);
+                        $currentHostingId = $this->pdo->lastInsertId();
+                        $results['hosting_created']++;
+                    }
+                }
+
+                // Extract service data (columns E-P)
+                $serviceData = [
+                    'name' => trim($row[4]),
+                    'domain' => trim($row[5]),
+                    'assigned_email' => trim($row[6]),
+                    'proprietario' => trim($row[7]),
+                    'email_server' => trim($row[8]),
+                    'expiry_date' => $this->parseDate($row[9]),
+                    'status' => trim($row[10]),
+                    'dns' => trim($row[11]),
+                    'cpanel' => trim($row[12]),
+                    'epanel' => trim($row[13]),
+                    'notes' => trim($row[14]),
+                    'remark' => trim($row[15]),
+                    'hosting_id' => $currentHostingId
+                ];
+
+                if (empty($serviceData['domain'])) {
+                    $results['skipped']++;
+                    continue;
+                }
+
+                // Check if website exists
+                $stmt = $this->pdo->prepare("SELECT id FROM websites WHERE domain = ?");
+                $stmt->execute([$serviceData['domain']]);
+                $websiteId = $stmt->fetchColumn();
+
+                if ($websiteId) {
+                    $this->updateWebsite($websiteId, $serviceData);
+                    $results['updated']++;
+                } else {
+                    $this->createWebsite($serviceData);
+                    $results['imported']++;
+                }
+            } catch (Exception $e) {
+                $results['errors'][] = "Row $rowNumber: " . $e->getMessage();
+                $results['skipped']++;
+            }
+        }
+
+        return $results;
+    }
+
+    private function getHostingIdByName($name): ?int
+    {
+        $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE LOWER(TRIM(server_name)) = LOWER(TRIM(?))");
+        $stmt->execute([$name]);
+        return $stmt->fetchColumn() ?: null;
+    }
+
+    private function createHostingPlan(array $data): int
+    {
+        $stmt = $this->pdo->prepare("
+        INSERT INTO hosting_plans (server_name, provider, email_address, ip_address) 
+        VALUES (?, ?, ?, ?)
+    ");
+        $stmt->execute([
+            $data['server_name'],
+            $data['provider'],
+            $data['email_address'],
+            $data['ip_address']
+        ]);
+        return $this->pdo->lastInsertId();
+    }
+
+
+    private function extractServiceData(array $row): array
+    {
+        return [
+            'name' => trim($row[4] ?? ''),
+            'domain' => trim($row[5] ?? ''),
+            'assigned_email' => trim($row[6] ?? ''),
+            'proprietario' => trim($row[7] ?? ''),
+            'email_server' => trim($row[8] ?? ''),
+            'expiry_date' => $this->parseDate($row[9] ?? ''),
+            'status' => trim($row[10] ?? ''),
+            'dns' => trim($row[11] ?? ''),
+            'cpanel' => trim($row[12] ?? ''),
+            'epanel' => trim($row[13] ?? ''),
+            'notes' => trim($row[14] ?? ''),
+            'remark' => trim($row[15] ?? '')
+        ];
+    }
+
+
+    /**
+     * Date handling methods
+     */
+    private function formatDate(?string $date): string
+    {
+        try {
+            return $date ? (new DateTime($date))->format('Y-m-d') : '';
+        } catch (Exception) {
+            return '';
+        }
+    }
+
+    private function parseDate(?string $date): string
+    {
+        try {
+            return $date ? (new DateTime($date))->format('Y-m-d') : date('Y-m-d', strtotime('+1 year'));
+        } catch (Exception) {
+            return date('Y-m-d', strtotime('+1 year'));
+        }
+    }
+
+    private function getHostingInfo($hostingId): array
+    {
+        if (!$hostingId) return [];
+
+        $stmt = $this->pdo->prepare("
+            SELECT server_name, ip_address, email_address, provider 
+            FROM hosting_plans 
+            WHERE id = ?
+        ");
+        $stmt->execute([$hostingId]);
+        return $stmt->fetch() ?: [];
     }
 }

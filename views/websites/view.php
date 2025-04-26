@@ -23,10 +23,26 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <!-- Confirmation Modal -->
+            <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-dark">
+                            <h5 class="modal-title">Conferma azione</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Chiudi">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="confirmationMessage">Sei sicuro?</div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Annulla</button>
+                            <button type="button" class="btn btn-success" id="confirmActionBtn">Conferma</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card">
-                <!--<div class="card-header">
-                    <h3 class="card-title"><?= htmlspecialchars($website['domain']) ?></h3>
-                </div>-->
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -109,15 +125,67 @@
                     </div>
                 </div>
                 <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
-                    <div class="card-footer text-right">
-                        <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>" class="btn btn-primary">
-                            <i class="fas fa-edit"></i> Modifica
-                        </a>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <div class="btn-group">
+                            <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
+                                class="btn btn-success confirmable" data-type="email"
+                                data-name="<?= htmlspecialchars($website['domain']) ?>">
+                                <i class="fas fa-envelope"></i> Invia Email Scadenza
+                            </a>
+                            <a href="index.php?action=email&do=status&id=<?= $website['id'] ?>"
+                                class="btn btn-danger confirmable ml-2" data-type="email"
+                                data-name="<?= htmlspecialchars($website['domain']) ?>">
+                                <i class="fas fa-bell"></i> Invia Report Stato
+                            </a>
+                        </div>
+                        <div>
+                            <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
+                                class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Modifica
+                            </a>
+                        </div>
                     </div>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
     </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let pendingAction = null;
+
+    // Handle confirmable actions (email)
+    document.querySelectorAll('.confirmable').forEach(el => {
+        if (el.tagName === 'A') {
+            // For email links
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                const type = this.dataset.type;
+                const name = this.dataset.name;
+                const action = this.href.includes('expiry') ? 'scadenza' : 'report stato';
+                const message =
+                    `Sei sicuro di voler inviare l'email di ${action} per il servizio: <strong>${name}</strong>?`;
+                document.getElementById('confirmationMessage').innerHTML = message;
+                $('#confirmationModal').modal('show');
+
+                pendingAction = () => {
+                    window.location.href = this.href;
+                };
+            });
+        }
+    });
+
+    // Handle confirmation button click
+    document.getElementById('confirmActionBtn').addEventListener('click', function() {
+        if (pendingAction) {
+            $('#confirmationModal').modal('hide');
+            setTimeout(pendingAction, 300);
+        }
+    });
+});
+</script>
 
 <?php include APP_PATH . '/includes/footer.php'; ?>

@@ -134,12 +134,17 @@ switch ($action) {
                 $settingsController->testSmtp();
                 break;
             case 'advanced':
+                // This will handle both GET and POST requests
                 $settingsController->advanced();
+                break;
+            case 'google_sheets':  // Add this new case
+                $settingsController->handleGoogleSheets();
                 break;
             default:
                 header('Location: index.php?action=settings&do=smtp');
         }
         break;
+
 
     // User Management - Super Admin only
     case 'users':

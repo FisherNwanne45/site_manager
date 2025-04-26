@@ -4,12 +4,14 @@ class WebsiteController
     private $websiteModel;
     private $hostingModel;
     private $emailController;
-
+    private $settingsModel;
+    private $pdo;
     public function __construct($pdo)
     {
         $this->websiteModel = new Website($pdo);
         $this->hostingModel = new Hosting($pdo);
         $this->emailController = new EmailController($pdo);
+        $this->settingsModel = new SettingsModel($pdo);
     }
 
     public function index()
@@ -353,5 +355,138 @@ class WebsiteController
         ];
 
         return $errors[$errorCode] ?? 'Unknown upload error';
+    }
+
+    public function exportToGoogleSheets(array $settings): array
+    {
+        $client = $this->initializeSheetsClient($settings);
+        $service = new Google\Service\Sheets($client);
+
+        try {
+            // Prepare all data with headers
+            $data = $this->prepareExportData();
+
+            // Clear and update sheet
+            $this->clearSheet($service, $settings);
+            $this->updateSheet($service, $settings, $data);
+
+            return [
+                'exported' => count($data) - 2, // Exclude header rows
+                'updated' => 0,
+                'errors' => 0
+            ];
+        } catch (Exception $e) {
+            error_log("Export failed: " . $e->getMessage());
+            throw new Exception("Export to Google Sheets failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Import data from Google Sheets
+     */
+    public function importFromGoogleSheets(array $settings): array
+    {
+        $client = $this->initializeSheetsClient($settings);
+        $service = new Google\Service\Sheets($client);
+
+        try {
+            $sheetData = $this->getSheetData($service, $settings);
+            return $this->websiteModel->importFromSheets($sheetData);
+        } catch (Exception $e) {
+            error_log("Import failed: " . $e->getMessage());
+            throw new Exception("Import from Google Sheets failed: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Synchronize data between database and Google Sheets
+     */
+
+    // In WebsiteController.php
+    public function syncWithGoogleSheets(): array
+    {
+        $settingsController = new SettingsController($this->pdo);
+        return $settingsController->syncWithGoogleSheets();
+    }
+
+    /**
+     * Helper Methods
+     */
+    private function initializeSheetsClient(array $settings): Google\Client
+    {
+        $client = new Google\Client();
+        $client->setApplicationName('Website Management System');
+        $client->setScopes([Google\Service\Sheets::SPREADSHEETS]);
+
+        try {
+            $credentials = json_decode($settings['credentials'], true, 512, JSON_THROW_ON_ERROR);
+            $client->setAuthConfig($credentials);
+            return $client;
+        } catch (Exception $e) {
+            throw new Exception("Failed to initialize Google Client: " . $e->getMessage());
+        }
+    }
+
+    private function prepareExportData(): array
+    {
+        $headers = [
+            ['Informazioni per il cliente', '', '', '', 'Informazioni sul servizio'],
+            ['Name', 'Address', 'Email', 'P.IVA', 'TIPOLOGIA DI SERVIZI', 'DETTAGLIO SERVIZI', 'EMAIL ASSEGNATA']
+        ];
+
+        $data = $this->websiteModel->prepareForGoogleSheets();
+        return array_merge($headers, $data);
+    }
+
+    private function clearSheet(Google\Service\Sheets $service, array $settings): void
+    {
+        try {
+            $range = $settings['sheet_name'] . '!A:Z';
+            $request = new Google\Service\Sheets\ClearValuesRequest();
+            $service->spreadsheets_values->clear($settings['sheet_id'], $range, $request);
+        } catch (Exception $e) {
+            throw new Exception("Failed to clear sheet: " . $e->getMessage());
+        }
+    }
+
+    private function updateSheet(Google\Service\Sheets $service, array $settings, array $data): void
+    {
+        $range = $settings['sheet_name'] . '!A1';
+        $body = new Google\Service\Sheets\ValueRange(['values' => $data]);
+
+        $service->spreadsheets_values->update(
+            $settings['sheet_id'],
+            $range,
+            $body,
+            ['valueInputOption' => 'USER_ENTERED']
+        );
+    }
+
+    private function getSheetData(Google\Service\Sheets $service, array $settings): array
+    {
+        $range = $settings['sheet_name'] . '!A:Z';
+        $response = $service->spreadsheets_values->get($settings['sheet_id'], $range);
+        return $response->getValues() ?: [];
+    }
+
+    private function analyzeSync(array $dbData, array $sheetData): array
+    {
+        $dbDomains = array_column($dbData, 'domain');
+        $sheetDomains = array_column(array_slice($sheetData, 2), 5); // Skip headers
+
+        $toExport = array_diff($dbDomains, $sheetDomains);
+        $toImport = array_diff($sheetDomains, $dbDomains);
+
+        return [
+            'needs_export' => !empty($toExport),
+            'needs_import' => !empty($toImport),
+            'export_domains' => $toExport,
+            'import_domains' => $toImport,
+            'exported' => 0,
+            'imported' => 0,
+            'updated' => 0,
+            'conflicts' => 0,
+            'errors' => 0
+        ];
     }
 }
