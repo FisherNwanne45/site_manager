@@ -192,7 +192,7 @@ class Website
         FROM websites w
         LEFT JOIN hosting_plans h ON w.hosting_id = h.id
         WHERE w.expiry_date < CURDATE()
-        ORDER BY w.expiry_date ASC
+        ORDER BY w.expiry_date DESC
     ");
         $stmt->execute();
         return $stmt->fetchAll();
@@ -943,102 +943,121 @@ class Website
     /**
      * Import data from Google Sheets format
      */
-    public function importFromSheets(array $sheetRows): array
-    {
-        $results = [
-            'imported' => 0,
-            'updated' => 0,
-            'skipped' => 0,
-            'errors' => [],
-            'hosting_created' => 0
-        ];
+   public function importFromSheets(array $sheetRows): array
+{
+    $results = [
+        'imported' => 0,
+        'updated' => 0,
+        'skipped' => 0,
+        'errors' => [],
+        'hosting_created' => 0,
+        'hosting_updated' => 0
+    ];
 
-        $currentHostingId = null;
+    $currentHostingId = null;
 
-        foreach ($sheetRows as $index => $row) {
-            $rowNumber = $index + 1;
+    foreach ($sheetRows as $index => $row) {
+        $rowNumber = $index + 1;
 
-            // Skip header rows (first 2 rows)
-            if ($rowNumber <= 1) {
-                continue;
-            }
+        // Skip header row (first row only)
+        if ($rowNumber <= 1) {
+            continue;
+        }
 
-            // Skip empty rows
-            if (empty(array_filter($row))) {
-                $results['skipped']++;
-                continue;
-            }
+        // Skip empty rows
+        if (empty(array_filter($row))) {
+            $results['skipped']++;
+            continue;
+        }
 
-            // Ensure we have all columns
-            $row = array_pad($row, 16, '');
+        // Ensure we have all columns
+        $row = array_pad($row, 16, '');
 
-            try {
-                // Extract client data (columns A-D)
-                $clientName = trim($row[0]);
-                $clientAddress = trim($row[1]);
-                $clientEmail = trim($row[2]);
-                $clientPiva = trim($row[3]);
+        try {
+            // Extract client data (columns A-D)
+            $clientName = trim($row[0]);
+            $clientAddress = trim($row[1]);
+            $clientEmail = trim($row[2]);
+            $clientPiva = trim($row[3]);
 
-                // If client name exists, create/update hosting
-                if (!empty($clientName)) {
-                    $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE server_name = ?");
-                    $stmt->execute([$clientName]);
-                    $currentHostingId = $stmt->fetchColumn();
+            // Process hosting plan if client name exists
+            if (!empty($clientName)) {
+                $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE server_name = ?");
+                $stmt->execute([$clientName]);
+                $currentHostingId = $stmt->fetchColumn();
 
-                    if (!$currentHostingId) {
-                        $stmt = $this->pdo->prepare("
+                if ($currentHostingId) {
+                    // Update existing hosting plan
+                    $updateStmt = $this->pdo->prepare("
+                        UPDATE hosting_plans 
+                        SET email_address = ?, ip_address = ?, provider = ?
+                        WHERE id = ?
+                    ");
+                    $updateStmt->execute([$clientEmail, $clientAddress, $clientPiva, $currentHostingId]);
+                    $results['hosting_updated']++;
+                } else {
+                    // Create new hosting plan
+                    $stmt = $this->pdo->prepare("
                         INSERT INTO hosting_plans 
                         (server_name, ip_address, email_address, provider) 
                         VALUES (?, ?, ?, ?)
                     ");
-                        $stmt->execute([$clientName, $clientAddress, $clientEmail, $clientPiva]);
-                        $currentHostingId = $this->pdo->lastInsertId();
-                        $results['hosting_created']++;
-                    }
+                    $stmt->execute([$clientName, $clientAddress, $clientEmail, $clientPiva]);
+                    $currentHostingId = $this->pdo->lastInsertId();
+                    $results['hosting_created']++;
                 }
-
-                // Extract service data (columns E-P)
-                $serviceData = [
-                    'name' => trim($row[4]),
-                    'domain' => trim($row[5]),
-                    'assigned_email' => trim($row[6]),
-                    'proprietario' => trim($row[7]),
-                    'email_server' => trim($row[8]),
-                    'expiry_date' => $this->parseDate($row[9]),
-                    'status' => trim($row[10]),
-                    'dns' => trim($row[11]),
-                    'cpanel' => trim($row[12]),
-                    'epanel' => trim($row[13]),
-                    'notes' => trim($row[14]),
-                    'remark' => trim($row[15]),
-                    'hosting_id' => $currentHostingId
-                ];
-
-                if (empty($serviceData['domain'])) {
-                    $results['skipped']++;
-                    continue;
-                }
-
-                // Check if website exists
-                $stmt = $this->pdo->prepare("SELECT id FROM websites WHERE domain = ?");
-                $stmt->execute([$serviceData['domain']]);
-                $websiteId = $stmt->fetchColumn();
-
-                if ($websiteId) {
-                    $this->updateWebsite($websiteId, $serviceData);
-                    $results['updated']++;
-                } else {
-                    $this->createWebsite($serviceData);
-                    $results['imported']++;
-                }
-            } catch (Exception $e) {
-                $results['errors'][] = "Row $rowNumber: " . $e->getMessage();
-                $results['skipped']++;
             }
-        }
 
-        return $results;
+            // Extract service data (columns E-P)
+            $serviceData = [
+                'name' => trim($row[4]),
+                'domain' => strtolower(trim($row[5])), // Normalize domain to lowercase
+                'assigned_email' => trim($row[6]),
+                'proprietario' => trim($row[7]),
+                'email_server' => trim($row[8]),
+                'expiry_date' => $this->parseDate($row[9]),
+                'status' => trim($row[10]),
+                'dns' => trim($row[11]),
+                'cpanel' => trim($row[12]),
+                'epanel' => trim($row[13]),
+                'notes' => trim($row[14]),
+                'remark' => trim($row[15]),
+                'hosting_id' => $currentHostingId
+            ];
+
+            // Skip if domain is empty
+            if (empty($serviceData['domain'])) {
+                $results['skipped']++;
+                continue;
+            }
+
+            // Check if website exists (case-insensitive comparison)
+            $stmt = $this->pdo->prepare("SELECT id FROM websites WHERE LOWER(domain) = ?");
+            $stmt->execute([$serviceData['domain']]);
+            $websiteId = $stmt->fetchColumn();
+
+            if ($websiteId) {
+                // Update existing website
+                $updated = $this->updateWebsite($websiteId, $serviceData);
+                $results['updated'] += $updated ? 1 : 0;
+            } else {
+                // Create new website
+                $createdId = $this->createWebsite($serviceData);
+                if ($createdId) {
+                    $results['imported']++;
+                } else {
+                    throw new Exception("Failed to create website");
+                }
+            }
+        } catch (Exception $e) {
+            $domain = $serviceData['domain'] ?? 'unknown';
+            $results['errors'][] = "Row $rowNumber (Domain: $domain): " . $e->getMessage();
+            $results['skipped']++;
+        }
     }
+
+    return $results;
+}
 
     private function getHostingIdByName($name): ?int
     {
@@ -1062,7 +1081,7 @@ class Website
         return $this->pdo->lastInsertId();
     }
 
-
+/*hey */
     private function extractServiceData(array $row): array
     {
         return [
@@ -1086,19 +1105,19 @@ class Website
      * Date handling methods
      */
     private function formatDate(?string $date): string
-    {
-        try {
-            return $date ? (new DateTime($date))->format('Y-m-d') : '';
-        } catch (Exception) {
-            return '';
-        }
+{
+    try {
+        return $date ? (new DateTime($date))->format('Y-m-d') : '';
+    } catch (Exception $e) {
+        return '';
     }
+}
 
     private function parseDate(?string $date): string
     {
         try {
             return $date ? (new DateTime($date))->format('Y-m-d') : date('Y-m-d', strtotime('+1 year'));
-        } catch (Exception) {
+        } catch (Exception $e) {
             return date('Y-m-d', strtotime('+1 year'));
         }
     }

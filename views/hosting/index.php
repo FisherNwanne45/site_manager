@@ -34,7 +34,59 @@
                 <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
                 <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
-            <style>
+             <style>
+                /* Ensure the table header and body columns align */
+                .table-responsive {
+                    overflow-x: auto;
+                }
+
+                /* Make sure the action buttons stay together */
+                .btn-group-actions {
+                    display: inline-flex;
+                    flex-wrap: nowrap;
+                }
+
+                /* Optional: Add horizontal scroll for small screens */
+                @media (max-width: 768px) {
+                    .table-responsive {
+                        -webkit-overflow-scrolling: touch;
+                    }
+                }
+
+                .no-wrap {
+                    white-space: nowrap;
+                    width: 17%;
+                }
+
+                .site-wrap {
+                    white-space: nowrap;
+                    width: 20%;
+                }
+
+                .date-wrap {
+                    white-space: nowrap;
+                    width: 10%;
+                }
+
+                .table-sm-text {
+                    font-size: 0.90rem;
+                }
+
+                .table-sm-text th,
+                .table-sm-text td {
+                    padding: 0.5rem 0.8rem;
+                }
+
+                .table td,
+                .table th {
+                    white-space: normal !important;
+                    /* word-break: break-word;*/
+                    max-width: 200px;
+
+                    vertical-align: top;
+                }
+
+
                 /* Custom Tooltip Styles */
                 [data-custom-tooltip] {
                     position: relative;
@@ -85,77 +137,16 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <style>
-                            .table-sm-text {
-                                font-size: 0.90rem;
-                            }
-
-                            .table-sm-text th,
-                            .table-sm-text td {
-                                padding: 0.5rem 0.8rem;
-                            }
-
-                            .table td,
-                            .table th {
-                                white-space: normal !important;
-                                word-break: break-word;
-                                max-width: 200px;
-                                /* or whatever max width works for you */
-                                vertical-align: top;
-                            }
-
-
-                            /* Custom Tooltip Styles */
-                            [data-custom-tooltip] {
-                                position: relative;
-                                cursor: pointer;
-                            }
-
-                            [data-custom-tooltip]::after {
-                                content: attr(data-custom-tooltip);
-                                position: absolute;
-                                bottom: 100%;
-                                left: 50%;
-                                transform: translateX(-50%);
-                                background: #333;
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 4px;
-                                font-size: 14px;
-                                font-weight: bold;
-                                white-space: nowrap;
-                                opacity: 0;
-                                visibility: hidden;
-                                transition: opacity 0.2s, visibility 0.2s;
-                                z-index: 1000;
-                                pointer-events: none;
-                                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-                            }
-
-                            [data-custom-tooltip]:hover::after {
-                                opacity: 1;
-                                visibility: visible;
-                            }
-
-                            /* Remove default tooltips */
-                            [title] {
-                                position: relative;
-                            }
-
-                            [title]:hover::before,
-                            [title]:hover::after {
-                                display: none !important;
-                            }
-                        </style>
+                         
                         <table class="table table-bordered table-striped table-hover mb-0 table-sm-text">
                             <thead class="thead-dark">
                                 <tr>
-                                    <th>Nome del cliente</th>
-                                    <th>P.IVA</th>
-                                    <th>E-mail</th>
-                                    <th>Indirizzo</th>
-                                    <th>Servizi</th>
-                                    <th>Actions</th>
+                                    <th class="site-wrap">Nome del cliente</th>
+                                    <th class="site-wrap">P.IVA</th>
+                                    <th class="site-wrap">E-mail</th>
+                                    <th class="site-wrap">Indirizzo</th>
+                                    <th class="">Servizi</th>
+                                    <th class="">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,10 +174,10 @@
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
-                                                <a href="index.php?action=hosting&do=edit&id=<?= $plan['id'] ?>"
+                                                <!--<a href="index.php?action=hosting&do=edit&id=<?= $plan['id'] ?>"
                                                     class="btn btn-sm btn-primary" data-custom-tooltip="Modificare">
                                                     <i class="fas fa-edit"></i>
-                                                </a>
+                                                </a>-->
                                                 <form method="post"
                                                     action="index.php?action=hosting&do=delete&id=<?= $plan['id'] ?>"
                                                     class="d-inline"

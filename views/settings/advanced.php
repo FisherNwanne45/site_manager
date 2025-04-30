@@ -120,7 +120,7 @@
                                     <label for="google_sheet_id">ID del Google Sheet</label>
                                     <input type="text" class="form-control" id="google_sheet_id" name="google_sheet_id"
                                         value="<?= htmlspecialchars($googleSheetSettings['sheet_id'] ?? '') ?>"
-                                        placeholder="Inserisci l'ID del Google Sheet">
+                                        placeholder="Inserisci l'ID del Google Sheet" >
                                     <small class="form-text text-muted">Trovato nell'URL del tuo Google Sheet (tra /d/ e
                                         /edit)</small>
                                 </div>
@@ -130,7 +130,7 @@
                                     <input type="text" class="form-control" id="google_sheet_name"
                                         name="google_sheet_name"
                                         value="<?= htmlspecialchars($googleSheetSettings['sheet_name'] ?? '') ?>"
-                                        placeholder="Inserisci il nome del foglio (nome della tab)">
+                                        placeholder="Inserisci il nome del foglio (nome della tab)" >
                                 </div>
                             </div>
 
@@ -139,7 +139,7 @@
                                     <label for="google_credentials">Credenziali del Account di Servizio (JSON)</label>
                                     <textarea class="form-control" id="google_credentials" name="google_credentials"
                                         rows="7"
-                                        placeholder="Incolla le tue credenziali JSON dell'account di servizio"><?= htmlspecialchars($googleSheetSettings['credentials'] ?? '') ?></textarea>
+                                        placeholder="Incolla le tue credenziali JSON dell'account di servizio" ><?= htmlspecialchars($googleSheetSettings['credentials'] ?? '') ?></textarea>
                                 </div>
                             </div>
                         </div>

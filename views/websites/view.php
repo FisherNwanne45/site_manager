@@ -44,6 +44,15 @@
 
             <div class="card">
                 <div class="card-body">
+                    <?php if (isset($_SESSION['message'])): ?>
+                <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
+                <?php unset($_SESSION['message']); ?>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
                     <div class="row">
                         <div class="col-md-6">
                             <h6>Informazioni Generali</h6>

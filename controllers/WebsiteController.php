@@ -210,7 +210,7 @@ class WebsiteController
             try {
                 $this->websiteModel->updateWebsite($id, $data);
                 $_SESSION['message'] = "Il servizio '{$data['domain']}' è stato aggiornato con successo";
-                header('Location: index.php?action=websites');
+                header('Location: index.php?action=websites&do=view&id=' . $website['id']);
                 exit;
             } catch (PDOException $e) {
                 $error = "Errore durante l'aggiornamento del servizio:  '{$data['domain']}'  " . $e->getMessage();

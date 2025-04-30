@@ -45,12 +45,14 @@
                         <a href="index.php?action=websites&do=create" class="btn btn-primary btn-sm mr-2">
                             <i class="fas fa-plus"></i> Aggiungi servizio
                         </a><?php endif; ?>
-                    <form method="post" action="index.php?action=websites&do=export" class="d-inline">
+                    
+                </div>
+                <form method="post" action="index.php?action=websites&do=export" class="d-inline">
                         <button type="submit" class="btn btn-success btn-sm">
                             <i class="fas fa-file-export"></i> Esporta file Excel
                         </button>
                     </form>
-                </div><?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
+                <!--<?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
                     <form method="post" action="index.php?action=websites&do=import" enctype="multipart/form-data"
                         class="d-flex"
                         onsubmit="return confirm('Questo aggiornerà i siti web esistenti con i domini corrispondenti. Continuare?')">
@@ -66,7 +68,7 @@
                                 </button>
                             </div>
                         </div>
-                    </form><?php endif; ?>
+                    </form><?php endif; ?>-->
                 <script>
                     function updateFileName(input) {
                         if (input.files && input.files[0]) {
