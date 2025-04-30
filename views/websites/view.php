@@ -12,9 +12,18 @@
                     <h5>Dettagli Servizio: <b><?= htmlspecialchars($website['domain']) ?></b> </h5>
                 </div>
                 <div class="col-sm-6 text-right">
-                    <a onclick="window.history.back();" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Torna indietro
-                    </a>
+                    <div class="btn-group">
+                        <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
+                            class="btn btn-success confirmable" data-type="email"
+                            data-name="<?= htmlspecialchars($website['domain']) ?>">
+                            <i class="fas fa-envelope"></i> Invia Email Scadenza
+                        </a>
+                        <a href="index.php?action=email&do=status&id=<?= $website['id'] ?>"
+                            class="btn btn-danger confirmable ml-2" data-type="email"
+                            data-name="<?= htmlspecialchars($website['domain']) ?>">
+                            <i class="fas fa-bell"></i> Invia Report Stato
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,17 +54,21 @@
             <div class="card">
                 <div class="card-body">
                     <?php if (isset($_SESSION['message'])): ?>
-                <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
-                <?php unset($_SESSION['message']); ?>
-            <?php endif; ?>
+                        <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
+                        <?php unset($_SESSION['message']); ?>
+                    <?php endif; ?>
 
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
-                <?php unset($_SESSION['error']); ?>
-            <?php endif; ?>
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Informazioni Generali</h6>
+                            <h6>Informazioni Generali <span class="badge badge-<?=
+                                                                                $website['dynamic_status'] === 'attivo' ? 'success' : ($website['dynamic_status'] === 'scade_presto' ? 'warning' : 'danger')
+                                                                                ?>">
+                                    <?= ucwords(str_replace('_', ' ', $website['dynamic_status'])) ?>
+                                </span></h6>
                             <table class="table table-bordered">
                                 <tr>
                                     <th style="width: 30%">Cliente</th>
@@ -74,14 +87,8 @@
                                     <td><?= htmlspecialchars($website['expiry_date']) ?></td>
                                 </tr>
                                 <tr>
-                                    <th>Stato</th>
-                                    <td>
-                                        <span class="badge badge-<?=
-                                                                    $website['dynamic_status'] === 'attivo' ? 'success' : ($website['dynamic_status'] === 'scade_presto' ? 'warning' : 'danger')
-                                                                    ?>">
-                                            <?= ucwords(str_replace('_', ' ', $website['dynamic_status'])) ?>
-                                        </span>
-                                    </td>
+                                    <th>Costo Server</th>
+                                    <td><?= htmlspecialchars($website['status']) ?></td>
                                 </tr>
                             </table>
                         </div>
@@ -97,15 +104,15 @@
                                     <td><?= htmlspecialchars($website['proprietario'] ?? 'N/A') ?></td>
                                 </tr>
                                 <tr>
-                                    <th>DNS</th>
+                                    <th>Direct DNS A</th>
                                     <td><?= htmlspecialchars($website['dns'] ?? 'N/A') ?></td>
                                 </tr>
                                 <tr>
-                                    <th>cPanel</th>
+                                    <th>User cPanel</th>
                                     <td><?= htmlspecialchars($website['cpanel'] ?? 'N/A') ?></td>
                                 </tr>
                                 <tr>
-                                    <th>ePanel</th>
+                                    <th>Email panel</th>
                                     <td><?= htmlspecialchars($website['epanel'] ?? 'N/A') ?></td>
                                 </tr>
                             </table>
@@ -134,28 +141,17 @@
                     </div>
                 </div>
                 <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between">
-                        <div class="btn-group">
-                            <a href="index.php?action=email&do=expiry&id=<?= $website['id'] ?>"
-                                class="btn btn-success confirmable" data-type="email"
-                                data-name="<?= htmlspecialchars($website['domain']) ?>">
-                                <i class="fas fa-envelope"></i> Invia Email Scadenza
-                            </a>
-                            <a href="index.php?action=email&do=status&id=<?= $website['id'] ?>"
-                                class="btn btn-danger confirmable ml-2" data-type="email"
-                                data-name="<?= htmlspecialchars($website['domain']) ?>">
-                                <i class="fas fa-bell"></i> Invia Report Stato
-                            </a>
-                        </div>
-                        <div>
-                            <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
-                                class="btn btn-primary">
-                                <i class="fas fa-edit"></i> Modifica
-                            </a>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+
+                            <div>
+                                <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
+                                    class="btn btn-primary">
+                                    <i class="fas fa-edit"></i> Modifica
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -163,38 +159,38 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    let pendingAction = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        let pendingAction = null;
 
-    // Handle confirmable actions (email)
-    document.querySelectorAll('.confirmable').forEach(el => {
-        if (el.tagName === 'A') {
-            // For email links
-            el.addEventListener('click', function(e) {
-                e.preventDefault();
-                const type = this.dataset.type;
-                const name = this.dataset.name;
-                const action = this.href.includes('expiry') ? 'scadenza' : 'report stato';
-                const message =
-                    `Sei sicuro di voler inviare l'email di ${action} per il servizio: <strong>${name}</strong>?`;
-                document.getElementById('confirmationMessage').innerHTML = message;
-                $('#confirmationModal').modal('show');
+        // Handle confirmable actions (email)
+        document.querySelectorAll('.confirmable').forEach(el => {
+            if (el.tagName === 'A') {
+                // For email links
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const type = this.dataset.type;
+                    const name = this.dataset.name;
+                    const action = this.href.includes('expiry') ? 'scadenza' : 'report stato';
+                    const message =
+                        `Sei sicuro di voler inviare l'email di ${action} per il servizio: <strong>${name}</strong>?`;
+                    document.getElementById('confirmationMessage').innerHTML = message;
+                    $('#confirmationModal').modal('show');
 
-                pendingAction = () => {
-                    window.location.href = this.href;
-                };
-            });
-        }
+                    pendingAction = () => {
+                        window.location.href = this.href;
+                    };
+                });
+            }
+        });
+
+        // Handle confirmation button click
+        document.getElementById('confirmActionBtn').addEventListener('click', function() {
+            if (pendingAction) {
+                $('#confirmationModal').modal('hide');
+                setTimeout(pendingAction, 300);
+            }
+        });
     });
-
-    // Handle confirmation button click
-    document.getElementById('confirmActionBtn').addEventListener('click', function() {
-        if (pendingAction) {
-            $('#confirmationModal').modal('hide');
-            setTimeout(pendingAction, 300);
-        }
-    });
-});
 </script>
 
 <?php include APP_PATH . '/includes/footer.php'; ?>

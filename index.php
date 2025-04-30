@@ -81,6 +81,14 @@ switch ($action) {
             case 'view':
                 $hostingController->view($id);
                 break;
+            case 'service_create':
+                $hostingId = $_GET['id'] ?? null;
+                if ($hostingId) {
+                    $hostingController->serviceCreate($hostingId);
+                } else {
+                    header('Location: index.php?action=hosting');
+                }
+                break;
             case 'services':
                 $hostingId = $_GET['hostingId'] ?? $id;
                 if (!$hostingId) {

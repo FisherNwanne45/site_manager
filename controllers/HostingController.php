@@ -166,6 +166,9 @@ class HostingController
             // Get associated services
             $services = $this->websiteModel->getServicesByHostingId($hostingId);
 
+            // Add service count to hosting plan data
+            $hostingPlan['service_count'] = count($services);
+
             // Calculate dynamic status for each service
             foreach ($services as &$service) {
                 $service['dynamic_status'] = $this->websiteModel->calculateDynamicStatus($service['expiry_date']);
@@ -178,5 +181,51 @@ class HostingController
             header('Location: index.php?action=hosting');
             exit;
         }
+    }
+
+    // Add this method to your HostingController class
+    public function serviceCreate($hostingId)
+    {
+        if (!isset($_SESSION['user_id']) || !isset($_SESSION['LAST_ACTIVITY'])) {
+            header('Location: index.php?action=login');
+            exit;
+        }
+
+        $hostingPlan = $this->hostingModel->getHostingPlanById($hostingId);
+        if (!$hostingPlan) {
+            $_SESSION['error'] = "Cliente non trovato";
+            header('Location: index.php?action=hosting');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $data = [
+                'name' => $_POST['name'],
+                'domain' => $_POST['domain'],
+                'hosting_id' => $hostingId,
+                'email_server' => $_POST['email_server'],
+                'expiry_date' => $_POST['expiry_date'],
+                'status' => $_POST['status'],
+                'assigned_email' => $hostingPlan['email_address'],
+                'proprietario' => $_POST['proprietario'] ?? null,
+                'dns' => $_POST['dns'] ?? null,
+                'cpanel' => $_POST['cpanel'] ?? null,
+                'epanel' => $_POST['epanel'] ?? null,
+                'notes' => $_POST['notes'] ?? null,
+                'remark' => $_POST['remark'] ?? null
+            ];
+
+            try {
+                $this->websiteModel->createWebsite($data);
+                $_SESSION['message'] = "Servizio ('{$data['domain']}') creato con successo per {$hostingPlan['server_name']}";
+                header("Location: index.php?action=hosting&do=services&id=$hostingId");
+                exit;
+            } catch (PDOException $e) {
+                $error = "Errore durante la creazione del servizio: " . $e->getMessage();
+                $website = $data; // Preserve form input
+            }
+        }
+
+        require APP_PATH . '/views/hosting/service_create.php';
     }
 }

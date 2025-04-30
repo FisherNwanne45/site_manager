@@ -52,7 +52,8 @@ $website = array_merge($defaultWebsite, $website);
 
                 </div>
                 <div class="col-sm-6 text-right">
-                    <?php if ($website['id'] && $website['dynamic_status'] === 'scade_presto'): ?>
+                    <?php if ($website['id'] && in_array($website['dynamic_status'], ['scade_presto', 'scaduto'])): ?>
+
                         <form method="POST" action="index.php?action=websites&do=renew&id=<?= $website['id'] ?>"
                             class="d-inline">
                             <button type="submit" class="btn btn-success">

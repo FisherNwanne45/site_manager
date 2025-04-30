@@ -15,6 +15,10 @@
                     <a onclick="window.history.back();" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Torna indietro
                     </a>
+                    <a href="index.php?action=hosting&do=service_create&id=<?= $hostingPlan['id'] ?>"
+                        class="btn btn-primary ml-2">
+                        <i class="fas fa-plus"></i> Aggiungi servizio
+                    </a>
                 </div>
             </div>
         </div>
