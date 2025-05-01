@@ -257,16 +257,16 @@ class WebsiteController
             error_log("New expiry date set: $newExpiry");
 
             // Send notification
-            $notificationSent = $this->emailController->sendRenewalNotification(
-                $id,
-                $newExpiry,
-                $website['status']
-            );
+            // $notificationSent = $this->emailController->sendRenewalNotification(
+            //    $id,
+            //     $newExpiry,
+            //    $website['status']
+            //);
 
             $_SESSION['message'] = "Il servizio '{$website['domain']}' viene rinnovato fino a " . date('F j, Y', strtotime($newExpiry));
-            if (!$notificationSent) {
-                $_SESSION['message'] .= " (Notification failed)";
-            }
+            // if (!$notificationSent) {
+            // $_SESSION['message'] .= " (Nessuna notifica inviata)";
+            // }
 
             // Redirect back to edit page with success message
             header("Location: index.php?action=websites");

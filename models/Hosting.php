@@ -126,6 +126,18 @@ class Hosting
         return $stmt->fetchAll();
     }
 
+    public function getLiberiHostingServicesCount()
+    {
+        $stmt = $this->pdo->prepare("
+        SELECT COUNT(w.id) 
+        FROM websites w
+        JOIN hosting_plans h ON w.hosting_id = h.id
+        WHERE h.server_name LIKE '%~%'
+    ");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
 
     public function getServicesByHostingId($hostingId)
     {

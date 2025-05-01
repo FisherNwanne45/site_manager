@@ -25,6 +25,7 @@ class DashboardController
         $expiringHostingCount = $hostingModel->getExpiringHostingCount(30); // Next 30 days
         $buggyWebsitesCount = $websiteModel->getBuggyWebsitesCount();
         $expiredWebsitesCount = $websiteModel->getExpiredWebsitesCount();
+        $liberiCount = $hostingModel->getLiberiHostingServicesCount();
 
         // Get detailed lists for tables
         $expiringWebsites = $websiteModel->getExpiringWebsites(30); // Next 30 days
