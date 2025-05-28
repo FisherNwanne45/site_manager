@@ -87,8 +87,7 @@ class Website
     {
         $stmt = $this->pdo->prepare("
         INSERT INTO websites 
-        (name, domain, hosting_id, email_server, expiry_date, status, 
-         assigned_email, proprietario, dns, cpanel, epanel, notes, remark) 
+        (name, domain, hosting_id, email_server, expiry_date, status, vendita, assigned_email, proprietario, dns, cpanel, epanel, notes, remark) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
         return $stmt->execute([
@@ -98,6 +97,7 @@ class Website
             $data['email_server'],
             $data['expiry_date'],
             $data['status'],
+            $data['vendita'],
             $data['assigned_email'],
             $data['proprietario'] ?? null,
             $data['dns'] ?? null,
@@ -118,6 +118,7 @@ class Website
         email_server = ?, 
         expiry_date = ?, 
         status = ?, 
+        vendita = ?, 
         assigned_email = ?,
         proprietario = ?,
         dns = ?,
@@ -134,6 +135,7 @@ class Website
             $data['email_server'],
             $data['expiry_date'],
             $data['status'],
+            $data['vendita'],
             $data['assigned_email'],
             $data['proprietario'] ?? null,
             $data['dns'] ?? null,
@@ -267,11 +269,12 @@ class Website
                 'email_server' => $safeTrim($row[8] ?? null),
                 'expiry_date' => $safeTrim($row[9] ?? date('Y-m-d', strtotime('+1 year'))),
                 'status' => $safeTrim($row[10] ?? ''),
-                'dns' => $safeTrim($row[11] ?? null),
-                'cpanel' => $safeTrim($row[12] ?? null),
-                'epanel' => $safeTrim($row[13] ?? null),
-                'notes' => $safeTrim($row[14] ?? null),
-                'remark' => $safeTrim($row[15] ?? null)
+                'vendita' => $safeTrim($row[11] ?? ''),
+                'dns' => $safeTrim($row[12] ?? null),
+                'cpanel' => $safeTrim($row[13] ?? null),
+                'epanel' => $safeTrim($row[14] ?? null),
+                'notes' => $safeTrim($row[15] ?? null),
+                'remark' => $safeTrim($row[16] ?? null)
             ];
 
             // Validate required service fields
@@ -397,6 +400,7 @@ class Website
                 'REGISTRANTE' => 'w.email_server',
                 'SCADENZA' => 'w.expiry_date',
                 'COSTO SERVER (iva inclusa)' => 'w.status',
+                'Prezzo di vendita' => 'w.vendita',
                 'Direct DNS A' => 'w.dns',
                 'User Name cpanel' => 'w.cpanel',
                 'Email panel' => 'w.epanel',
@@ -418,11 +422,12 @@ class Website
             'I' => 25, // REGISTRANTE
             'J' => 15, // SCADENZA
             'K' => 20, // COSTO SERVER
-            'L' => 20, // Direct DNS A
-            'M' => 20, // User Name cpanel
-            'N' => 20, // Email panel
-            'O' => 40, // Bug report
-            'P' => 40  // Notes
+            'L' => 20, // PREZZO DI VENDITA
+            'M' => 20, // Direct DNS A
+            'N' => 20, // User Name cpanel
+            'O' => 20, // Email panel
+            'P' => 40, // Bug report
+            'Q' => 40  // Notes
         ];
 
         // Professional color scheme (dark blue gradient with accent colors)
@@ -449,7 +454,7 @@ class Website
                 'font' => [
                     'bold' => true,
                     'color' => $colors['textLight'],
-                    'size' => 12
+                    'size' => 13
                 ],
                 'alignment' => [
                     'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -893,6 +898,7 @@ class Website
                 $website['email_server'] ?? '',
                 $this->formatDate($website['expiry_date'] ?? ''),
                 $website['status'] ?? '',
+                $website['vendita'] ?? '',
                 $website['dns'] ?? '',
                 $website['cpanel'] ?? '',
                 $website['epanel'] ?? '',
@@ -932,6 +938,7 @@ class Website
             $website['email_server'] ?? '',
             $this->formatDate($website['expiry_date'] ?? ''),
             $website['status'] ?? '',
+            $website['vendita'] ?? '',
             $website['dns'] ?? '',
             $website['cpanel'] ?? '',
             $website['epanel'] ?? '',
@@ -943,121 +950,122 @@ class Website
     /**
      * Import data from Google Sheets format
      */
-   public function importFromSheets(array $sheetRows): array
-{
-    $results = [
-        'imported' => 0,
-        'updated' => 0,
-        'skipped' => 0,
-        'errors' => [],
-        'hosting_created' => 0,
-        'hosting_updated' => 0
-    ];
+    public function importFromSheets(array $sheetRows): array
+    {
+        $results = [
+            'imported' => 0,
+            'updated' => 0,
+            'skipped' => 0,
+            'errors' => [],
+            'hosting_created' => 0,
+            'hosting_updated' => 0
+        ];
 
-    $currentHostingId = null;
+        $currentHostingId = null;
 
-    foreach ($sheetRows as $index => $row) {
-        $rowNumber = $index + 1;
+        foreach ($sheetRows as $index => $row) {
+            $rowNumber = $index + 1;
 
-        // Skip header row (first row only)
-        if ($rowNumber <= 1) {
-            continue;
-        }
-
-        // Skip empty rows
-        if (empty(array_filter($row))) {
-            $results['skipped']++;
-            continue;
-        }
-
-        // Ensure we have all columns
-        $row = array_pad($row, 16, '');
-
-        try {
-            // Extract client data (columns A-D)
-            $clientName = trim($row[0]);
-            $clientAddress = trim($row[1]);
-            $clientEmail = trim($row[2]);
-            $clientPiva = trim($row[3]);
-
-            // Process hosting plan if client name exists
-            if (!empty($clientName)) {
-                $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE server_name = ?");
-                $stmt->execute([$clientName]);
-                $currentHostingId = $stmt->fetchColumn();
-
-                if ($currentHostingId) {
-                    // Update existing hosting plan
-                    $updateStmt = $this->pdo->prepare("
-                        UPDATE hosting_plans 
-                        SET email_address = ?, ip_address = ?, provider = ?
-                        WHERE id = ?
-                    ");
-                    $updateStmt->execute([$clientEmail, $clientAddress, $clientPiva, $currentHostingId]);
-                    $results['hosting_updated']++;
-                } else {
-                    // Create new hosting plan
-                    $stmt = $this->pdo->prepare("
-                        INSERT INTO hosting_plans 
-                        (server_name, ip_address, email_address, provider) 
-                        VALUES (?, ?, ?, ?)
-                    ");
-                    $stmt->execute([$clientName, $clientAddress, $clientEmail, $clientPiva]);
-                    $currentHostingId = $this->pdo->lastInsertId();
-                    $results['hosting_created']++;
-                }
+            // Skip header row (first row only)
+            if ($rowNumber <= 1) {
+                continue;
             }
 
-            // Extract service data (columns E-P)
-            $serviceData = [
-                'name' => trim($row[4]),
-                'domain' => strtolower(trim($row[5])), // Normalize domain to lowercase
-                'assigned_email' => trim($row[6]),
-                'proprietario' => trim($row[7]),
-                'email_server' => trim($row[8]),
-                'expiry_date' => $this->parseDate($row[9]),
-                'status' => trim($row[10]),
-                'dns' => trim($row[11]),
-                'cpanel' => trim($row[12]),
-                'epanel' => trim($row[13]),
-                'notes' => trim($row[14]),
-                'remark' => trim($row[15]),
-                'hosting_id' => $currentHostingId
-            ];
-
-            // Skip if domain is empty
-            if (empty($serviceData['domain'])) {
+            // Skip empty rows
+            if (empty(array_filter($row))) {
                 $results['skipped']++;
                 continue;
             }
 
-            // Check if website exists (case-insensitive comparison)
-            $stmt = $this->pdo->prepare("SELECT id FROM websites WHERE LOWER(domain) = ?");
-            $stmt->execute([$serviceData['domain']]);
-            $websiteId = $stmt->fetchColumn();
+            // Ensure we have all columns
+            $row = array_pad($row, 17, '');
 
-            if ($websiteId) {
-                // Update existing website
-                $updated = $this->updateWebsite($websiteId, $serviceData);
-                $results['updated'] += $updated ? 1 : 0;
-            } else {
-                // Create new website
-                $createdId = $this->createWebsite($serviceData);
-                if ($createdId) {
-                    $results['imported']++;
-                } else {
-                    throw new Exception("Failed to create website");
+            try {
+                // Extract client data (columns A-D)
+                $clientName = trim($row[0]);
+                $clientAddress = trim($row[1]);
+                $clientEmail = trim($row[2]);
+                $clientPiva = trim($row[3]);
+
+                // Process hosting plan if client name exists
+                if (!empty($clientName)) {
+                    $stmt = $this->pdo->prepare("SELECT id FROM hosting_plans WHERE server_name = ?");
+                    $stmt->execute([$clientName]);
+                    $currentHostingId = $stmt->fetchColumn();
+
+                    if ($currentHostingId) {
+                        // Update existing hosting plan
+                        $updateStmt = $this->pdo->prepare("
+                        UPDATE hosting_plans 
+                        SET email_address = ?, ip_address = ?, provider = ?
+                        WHERE id = ?
+                    ");
+                        $updateStmt->execute([$clientEmail, $clientAddress, $clientPiva, $currentHostingId]);
+                        $results['hosting_updated']++;
+                    } else {
+                        // Create new hosting plan
+                        $stmt = $this->pdo->prepare("
+                        INSERT INTO hosting_plans 
+                        (server_name, ip_address, email_address, provider) 
+                        VALUES (?, ?, ?, ?)
+                    ");
+                        $stmt->execute([$clientName, $clientAddress, $clientEmail, $clientPiva]);
+                        $currentHostingId = $this->pdo->lastInsertId();
+                        $results['hosting_created']++;
+                    }
                 }
-            }
-        } catch (Exception $e) {
-            $domain = $serviceData['domain'] ?? 'unknown';
-            $results['errors'][] = "Row $rowNumber (Domain: $domain): " . $e->getMessage();
-            $results['skipped']++;
-        }
-    }
 
-    return $results;
-}
+                // Extract service data (columns E-P)
+                $serviceData = [
+                    'name' => trim($row[4]),
+                    'domain' => strtolower(trim($row[5])), // Normalize domain to lowercase
+                    'assigned_email' => trim($row[6]),
+                    'proprietario' => trim($row[7]),
+                    'email_server' => trim($row[8]),
+                    'expiry_date' => $this->parseDate($row[9]),
+                    'status' => trim($row[10]),
+                    'vendita' => trim($row[11]),
+                    'dns' => trim($row[12]),
+                    'cpanel' => trim($row[13]),
+                    'epanel' => trim($row[14]),
+                    'notes' => trim($row[15]),
+                    'remark' => trim($row[16]),
+                    'hosting_id' => $currentHostingId
+                ];
+
+                // Skip if domain is empty
+                if (empty($serviceData['domain'])) {
+                    $results['skipped']++;
+                    continue;
+                }
+
+                // Check if website exists (case-insensitive comparison)
+                $stmt = $this->pdo->prepare("SELECT id FROM websites WHERE LOWER(domain) = ?");
+                $stmt->execute([$serviceData['domain']]);
+                $websiteId = $stmt->fetchColumn();
+
+                if ($websiteId) {
+                    // Update existing website
+                    $updated = $this->updateWebsite($websiteId, $serviceData);
+                    $results['updated'] += $updated ? 1 : 0;
+                } else {
+                    // Create new website
+                    $createdId = $this->createWebsite($serviceData);
+                    if ($createdId) {
+                        $results['imported']++;
+                    } else {
+                        throw new Exception("Failed to create website");
+                    }
+                }
+            } catch (Exception $e) {
+                $domain = $serviceData['domain'] ?? 'unknown';
+                $results['errors'][] = "Row $rowNumber (Domain: $domain): " . $e->getMessage();
+                $results['skipped']++;
+            }
+        }
+
+        return $results;
+    }
 
     private function getHostingIdByName($name): ?int
     {
@@ -1081,7 +1089,7 @@ class Website
         return $this->pdo->lastInsertId();
     }
 
-/*hey */
+    /*hey */
     private function extractServiceData(array $row): array
     {
         return [
@@ -1092,11 +1100,12 @@ class Website
             'email_server' => trim($row[8] ?? ''),
             'expiry_date' => $this->parseDate($row[9] ?? ''),
             'status' => trim($row[10] ?? ''),
-            'dns' => trim($row[11] ?? ''),
-            'cpanel' => trim($row[12] ?? ''),
-            'epanel' => trim($row[13] ?? ''),
-            'notes' => trim($row[14] ?? ''),
-            'remark' => trim($row[15] ?? '')
+            'vendita' => trim($row[11] ?? ''),
+            'dns' => trim($row[12] ?? ''),
+            'cpanel' => trim($row[13] ?? ''),
+            'epanel' => trim($row[14] ?? ''),
+            'notes' => trim($row[15] ?? ''),
+            'remark' => trim($row[16] ?? '')
         ];
     }
 
@@ -1105,13 +1114,13 @@ class Website
      * Date handling methods
      */
     private function formatDate(?string $date): string
-{
-    try {
-        return $date ? (new DateTime($date))->format('Y-m-d') : '';
-    } catch (Exception $e) {
-        return '';
+    {
+        try {
+            return $date ? (new DateTime($date))->format('Y-m-d') : '';
+        } catch (Exception $e) {
+            return '';
+        }
     }
-}
 
     private function parseDate(?string $date): string
     {

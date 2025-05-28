@@ -8,6 +8,14 @@ $websiteController = new WebsiteController($GLOBALS['pdo']);
 $hostingController = new HostingController($GLOBALS['pdo']);
 $emailController = new EmailController($GLOBALS['pdo']);
 $settingsController = new SettingsController($GLOBALS['pdo']);
+$emailModel = new Email($pdo);
+
+$messagingController = new MessagingController(
+    new MessageThread($pdo),
+    new Group($pdo),
+    new User($pdo),
+    $emailModel
+);
 
 // Get action from request
 $action = $_GET['action'] ?? 'login';
@@ -175,6 +183,34 @@ switch ($action) {
                 $authController->listUsers();
         }
         break;
+
+    // Messaging
+    case 'messaging':
+        $authController->checkPermission('viewer'); //  minimum role
+        switch ($do) {
+            case 'test':  // Add this new case
+                $this->showTestPage();
+                break;
+            case 'inbox':
+                $messagingController->inbox();
+                break;
+            case 'view':
+                $messagingController->viewThread($id);
+                break;
+            case 'compose':
+                $messagingController->compose();
+                break;
+            case 'send':
+                $messagingController->send();
+                break;
+            case 'groups':
+                $messagingController->listGroups();
+                break;
+            default:
+                $messagingController->inbox();
+        }
+        break;
+
 
     default:
         header('Location: index.php?action=login');

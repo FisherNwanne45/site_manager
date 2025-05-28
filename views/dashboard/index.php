@@ -82,7 +82,7 @@
                     <div class="small-box bg-secondary">
                         <div class="inner">
                             <h3><?= $buggyWebsitesCount ?></h3>
-                            <p> Servizi con problemi</p>
+                            <p><small> Servizi con problemi</small></p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-tools"></i>
@@ -103,7 +103,7 @@
                         <div class="icon">
                             <i class="fas fa-chain-broken"></i>
                         </div>
-                        <a href="index.php?action=hosting&do=services&id=105" class="small-box-footer">
+                        <a href="index.php?action=hosting&do=services&id=29" class="small-box-footer">
                             Più info <i class="fas fa-arrow-circle-right"></i>
                         </a>
                     </div>

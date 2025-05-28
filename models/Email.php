@@ -172,7 +172,7 @@ HTML;
     }
 
 
-    public function sendRenewalNotification($websiteId, $email, $domain, $newExpiryDate, $status)
+    public function sendRenewalNotification($websiteId, $email, $domain, $newExpiryDate, $vendita)
     {
         try {
             $subject = "Conferma del rinnovo del servizio: $domain";
@@ -183,7 +183,7 @@ HTML;
             
             <div class="card">
                 <p><strong>Nuova data di scadenza:</strong> ' . $newExpiryDate . '</p>
-                <p><strong>Costo di rinnovo:</strong> ' . $status . '</p>
+                <p><strong>Costo di rinnovo:</strong> ' . $vendita . '</p>
             </div>
             
             <p>Grazie per la tua continua collaborazione. Se hai domande, contatta il nostro team di supporto.</p>
@@ -204,7 +204,7 @@ HTML;
             $mail->Body = $this->getEmailTemplate($subject, $content);
             $mail->AltBody = "Service Renewal Confirmation\n\n" .
                 "Il tuo servizio - $domain è stato rinnovato fino a $newExpiryDate.\n" .
-                "Costo di rinnovo: $status\n\n" .
+                "Costo di rinnovo: $vendita\n\n" .
                 "Grazie per averci scelto!";
 
             $success = $mail->send();
@@ -323,7 +323,7 @@ HTML;
 
         try {
             // Keep your original status/renewal cost handling
-            $renewalCost = $website['status'] ?? 'N/A';
+            $renewalCost = $website['vendita'] ?? 'N/A';
 
             if ($daysUntilExpiry > 0) {
                 $subject = "Il tuo servizio - {$website['domain']} scade tra $daysUntilExpiry giorni";

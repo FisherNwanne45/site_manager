@@ -54,13 +54,13 @@
             <div class="card">
                 <div class="card-body">
                     <?php if (isset($_SESSION['message'])): ?>
-                        <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
-                        <?php unset($_SESSION['message']); ?>
+                    <div class="alert alert-success"><?= $_SESSION['message'] ?></div>
+                    <?php unset($_SESSION['message']); ?>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['error'])): ?>
-                        <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
-                        <?php unset($_SESSION['error']); ?>
+                    <div class="alert alert-danger"><?= $_SESSION['error'] ?></div>
+                    <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
                     <div class="row">
                         <div class="col-md-6">
@@ -70,6 +70,10 @@
                                     <?= ucwords(str_replace('_', ' ', $website['dynamic_status'])) ?>
                                 </span></h6>
                             <table class="table table-bordered">
+                                <tr>
+                                    <th>Servizio</th>
+                                    <td><?= htmlspecialchars($website['domain']) ?></td>
+                                </tr>
                                 <tr>
                                     <th style="width: 30%">Cliente</th>
                                     <td><?= htmlspecialchars($website['hosting_server'] ?? 'N/A') ?></td>
@@ -90,13 +94,14 @@
                                     <th>Costo Server</th>
                                     <td><?= htmlspecialchars($website['status']) ?></td>
                                 </tr>
+
                             </table>
                         </div>
                         <div class="col-md-6">
                             <h6>Dettagli Aggiuntivi</h6>
                             <table class="table table-bordered">
                                 <tr>
-                                    <th style="width: 30%">Email Assegnata</th>
+                                    <th style="width: 40%">Email Assegnata</th>
                                     <td><?= htmlspecialchars($website['assigned_email'] ?? 'N/A') ?></td>
                                 </tr>
                                 <tr>
@@ -114,6 +119,10 @@
                                 <tr>
                                     <th>Email panel</th>
                                     <td><?= htmlspecialchars($website['epanel'] ?? 'N/A') ?></td>
+                                </tr>
+                                <tr>
+                                    <th>Prezzo di vendita</th>
+                                    <td><?= htmlspecialchars($website['vendita']) ?></td>
                                 </tr>
                             </table>
                         </div>
@@ -141,17 +150,17 @@
                     </div>
                 </div>
                 <?php if ($userRole === 'manager' || $userRole === 'super_admin'): ?>
-                    <div class="card-footer">
-                        <div class="d-flex justify-content-between">
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
 
-                            <div>
-                                <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
-                                    class="btn btn-primary">
-                                    <i class="fas fa-edit"></i> Modifica
-                                </a>
-                            </div>
+                        <div>
+                            <a href="index.php?action=websites&do=edit&id=<?= $website['id'] ?>"
+                                class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Modifica
+                            </a>
                         </div>
                     </div>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -159,38 +168,38 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let pendingAction = null;
+document.addEventListener('DOMContentLoaded', function() {
+    let pendingAction = null;
 
-        // Handle confirmable actions (email)
-        document.querySelectorAll('.confirmable').forEach(el => {
-            if (el.tagName === 'A') {
-                // For email links
-                el.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const type = this.dataset.type;
-                    const name = this.dataset.name;
-                    const action = this.href.includes('expiry') ? 'scadenza' : 'report stato';
-                    const message =
-                        `Sei sicuro di voler inviare l'email di ${action} per il servizio: <strong>${name}</strong>?`;
-                    document.getElementById('confirmationMessage').innerHTML = message;
-                    $('#confirmationModal').modal('show');
+    // Handle confirmable actions (email)
+    document.querySelectorAll('.confirmable').forEach(el => {
+        if (el.tagName === 'A') {
+            // For email links
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                const type = this.dataset.type;
+                const name = this.dataset.name;
+                const action = this.href.includes('expiry') ? 'scadenza' : 'report stato';
+                const message =
+                    `Sei sicuro di voler inviare l'email di ${action} per il servizio: <strong>${name}</strong>?`;
+                document.getElementById('confirmationMessage').innerHTML = message;
+                $('#confirmationModal').modal('show');
 
-                    pendingAction = () => {
-                        window.location.href = this.href;
-                    };
-                });
-            }
-        });
-
-        // Handle confirmation button click
-        document.getElementById('confirmActionBtn').addEventListener('click', function() {
-            if (pendingAction) {
-                $('#confirmationModal').modal('hide');
-                setTimeout(pendingAction, 300);
-            }
-        });
+                pendingAction = () => {
+                    window.location.href = this.href;
+                };
+            });
+        }
     });
+
+    // Handle confirmation button click
+    document.getElementById('confirmActionBtn').addEventListener('click', function() {
+        if (pendingAction) {
+            $('#confirmationModal').modal('hide');
+            setTimeout(pendingAction, 300);
+        }
+    });
+});
 </script>
 
 <?php include APP_PATH . '/includes/footer.php'; ?>

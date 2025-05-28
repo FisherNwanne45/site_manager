@@ -21,7 +21,7 @@
     <section class="content">
         <div class="container-fluid">
             <?php if (isset($error)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
 
             <div class="card">
@@ -69,13 +69,19 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-2">
                                 <label for="status">Costo Server</label>
                                 <input type="text" class="form-control" id="status" name="status"
                                     value="<?= htmlspecialchars($website['status'] ?? '') ?>"
                                     placeholder="Costo Server (iva exclusa)">
                             </div>
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-2">
+                                <label for="vendita">Prezzo di vendita</label>
+                                <input type="text" class="form-control" id="vendita" name="vendita"
+                                    value="<?= htmlspecialchars($website['vendita'] ?? '') ?>"
+                                    placeholder="Prezzo di vendita">
+                            </div>
+                            <div class="form-group col-md-2">
                                 <label for="dns">Direct DNS A</label>
                                 <input type="text" class="form-control" id="dns" name="dns"
                                     value="<?= htmlspecialchars($website['dns'] ?? '') ?>" placeholder="Direct DNS A">

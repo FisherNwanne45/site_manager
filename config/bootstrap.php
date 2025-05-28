@@ -5,6 +5,10 @@ define('APP_PATH', BASE_PATH);
 // Define default language
 define('DEFAULT_LANG', 'it');
 
+// Error Reporting:
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Initialize language
 $lang = $_SESSION['lang'] ?? DEFAULT_LANG;
 $translations = [];

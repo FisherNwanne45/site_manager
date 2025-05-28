@@ -266,11 +266,12 @@ class SettingsController
             'I' => 120,  // REGISTRANTE
             'J' => 120,  // SCADENZA
             'K' => 120,  // COSTO SERVER
-            'L' => 120,  // Direct DNS A
-            'M' => 120,  // User Name cpanel
-            'N' => 150,  // Email panel
-            'O' => 200,  // Bug report
-            'P' => 200   // Notes
+            'L' => 120,  // PREZZO DI VENDITA
+            'M' => 120,  // Direct DNS A
+            'N' => 120,  // User Name cpanel
+            'O' => 150,  // Email panel
+            'P' => 200,  // Bug report
+            'Q' => 200   // Notes
         ];
 
         // Updated Color definitions (hex RGB)
@@ -338,6 +339,7 @@ class SettingsController
                     'Registrante',
                     'Scadenza',
                     'Costo Server (iva inclusa)',
+                    'Prezzo di vendita  (iva inclusa)',
                     'Direct DNS A',
                     'User Name cpanel',
                     'Email panel',
@@ -379,7 +381,7 @@ class SettingsController
                             'startRowIndex' => 0,
                             'endRowIndex' => 2,
                             'startColumnIndex' => 0,
-                            'endColumnIndex' => 16
+                            'endColumnIndex' => 17
                         ]
                     ]
                 ]),
@@ -404,7 +406,7 @@ class SettingsController
                             'startRowIndex' => 0,
                             'endRowIndex' => 1,
                             'startColumnIndex' => 4,
-                            'endColumnIndex' => 16
+                            'endColumnIndex' => 17
                         ],
                         'mergeType' => 'MERGE_ALL'
                     ]
@@ -427,7 +429,7 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 14
+                                    'fontSize' => 13
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
@@ -453,7 +455,7 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 14
+                                    'fontSize' => 15
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
@@ -471,7 +473,7 @@ class SettingsController
                             'startRowIndex' => 0,
                             'endRowIndex' => 1,
                             'startColumnIndex' => 4,
-                            'endColumnIndex' => 16
+                            'endColumnIndex' => 17
                         ],
                         'cell' => [
                             'userEnteredFormat' => [
@@ -479,7 +481,7 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 14
+                                    'fontSize' => 15
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
@@ -507,7 +509,7 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 12
+                                    'fontSize' => 10
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
@@ -533,7 +535,7 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 12
+                                    'fontSize' => 10
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
@@ -551,7 +553,7 @@ class SettingsController
                             'startRowIndex' => 1,
                             'endRowIndex' => 2,
                             'startColumnIndex' => 4,
-                            'endColumnIndex' => 16
+                            'endColumnIndex' => 17
                         ],
                         'cell' => [
                             'userEnteredFormat' => [
@@ -559,14 +561,20 @@ class SettingsController
                                 'textFormat' => [
                                     'bold' => true,
                                     'foregroundColor' => $hexToRgb($colors['textLight']['rgb']),
-                                    'fontSize' => 12
+                                    'fontSize' => 10
                                 ],
                                 'horizontalAlignment' => 'CENTER',
                                 'verticalAlignment' => 'MIDDLE',
-                                'padding' => ['top' => 10, 'right' => 10, 'bottom' => 10, 'left' => 10]
+                                'wrapStrategy' => 'WRAP',
+                                'padding' => [
+                                    'top' => 10,
+                                    'right' => 10,
+                                    'bottom' => 10,
+                                    'left' => 10
+                                ]
                             ]
                         ],
-                        'fields' => 'userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,padding)'
+                        'fields' => 'userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,verticalAlignment,wrapStrategy,padding)'
                     ]
                 ]),
 
@@ -578,7 +586,7 @@ class SettingsController
                             'startRowIndex' => 2,
                             'endRowIndex' => $lastRow,
                             'startColumnIndex' => 0,
-                            'endColumnIndex' => 16
+                            'endColumnIndex' => 17
                         ],
                         'cell' => [
                             'userEnteredFormat' => [
@@ -655,7 +663,7 @@ class SettingsController
                                 'startRowIndex' => $lastRowIndex,
                                 'endRowIndex' => $lastRowIndex + 1,
                                 'startColumnIndex' => 0,
-                                'endColumnIndex' => 16
+                                'endColumnIndex' => 17
                             ],
                             'bottom' => [
                                 'style' => 'SOLID_MEDIUM',

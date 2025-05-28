@@ -206,6 +206,7 @@ class HostingController
                 'email_server' => $_POST['email_server'],
                 'expiry_date' => $_POST['expiry_date'],
                 'status' => $_POST['status'],
+                'vendita' => $_POST['vendita'],
                 'assigned_email' => $hostingPlan['email_address'],
                 'proprietario' => $_POST['proprietario'] ?? null,
                 'dns' => $_POST['dns'] ?? null,
